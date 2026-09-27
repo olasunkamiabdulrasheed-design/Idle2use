@@ -2,7 +2,8 @@
 Django settings for the Idle2Use project (Stage 1: Project Foundation,
 Stage 2: User registration + JWT authentication,
 Stage 3: Resource + Availability,
-Stage 4: Capacity Requests).
+Stage 4: Capacity Requests,
+Stage 5: Matching Engine).
 
 Configuration is read from environment variables (see backend/.env.example).
 If PostgreSQL variables are not set, the project falls back to a local
@@ -52,6 +53,7 @@ INSTALLED_APPS = [
     "users",
     "resources",
     "capacity_requests",
+    "matches",
 ]
 
 MIDDLEWARE = [
@@ -152,7 +154,7 @@ SIMPLE_JWT = {
 
 # CORS: allow the Vite dev server to call the API from the browser.
 
-CORS_ALLOWED_ORIGINS = _env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+CORS_ALLOWED_ORIGINS = _env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5174")
 
 
 # Internationalization
