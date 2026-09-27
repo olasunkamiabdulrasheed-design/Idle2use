@@ -260,7 +260,11 @@ requirements (short string). Omit keys you cannot infer. No prose."""
 
 def ai_parse(text):
     """Call an OpenAI-compatible provider. Returns dict or raises."""
-    api_key = os.environ.get("AI_API_KEY", "").strip()
+    api_key = (
+        os.environ.get("AI_API_KEY", "").strip()
+        # Common alias; accept it so existing deployments keep working.
+        or os.environ.get("OPENAI_API_KEY", "").strip()
+    )
     if not api_key:
         raise RuntimeError("AI_API_KEY not configured")
     base = os.environ.get("AI_BASE_URL", "https://api.openai.com/v1").rstrip("/")

@@ -27,8 +27,9 @@ import type {
   RegisterPayload,
 } from "../types/auth";
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000"
+).replace(/\/+$/, "");
 
 const ACCESS_KEY = "idle2use.access";
 const REFRESH_KEY = "idle2use.refresh";
