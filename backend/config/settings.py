@@ -1,7 +1,8 @@
 """
 Django settings for the Idle2Use project (Stage 1: Project Foundation,
 Stage 2: User registration + JWT authentication,
-Stage 3: Resource + Availability).
+Stage 3: Resource + Availability,
+Stage 4: Capacity Requests).
 
 Configuration is read from environment variables (see backend/.env.example).
 If PostgreSQL variables are not set, the project falls back to a local
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "users",
     "resources",
+    "capacity_requests",
 ]
 
 MIDDLEWARE = [
