@@ -13,6 +13,7 @@ import {
 } from "./api/auth";
 import type { AuthUser, HealthResponse } from "./types/auth";
 import ResourcesPanel from "./components/ResourcesPanel";
+import RequestsPanel from "./components/RequestsPanel";
 
 type HealthState =
   | { state: "loading" }
@@ -180,7 +181,7 @@ export default function App() {
         {/* Stage 1 health check (unchanged behavior). */}
         <section className="rounded-2xl bg-white p-8 shadow">
           <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">
-            Idle2Use · Stage 1 + 2 + 3
+            Idle2Use · Stage 1 + 2 + 3 + 4
           </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900">
             Frontend → Backend check
@@ -295,7 +296,8 @@ export default function App() {
           )}
         </section>
 
-        {/* Stage 3 resources (authenticated users only). */}
+        {/* Stage 4 capacity requests + Stage 3 resources (authenticated only). */}
+        {user && <RequestsPanel />}
         {user && <ResourcesPanel />}
       </div>
     </main>
