@@ -70,3 +70,12 @@ export function parseRequestText(text: string): Promise<ParseResponse> {
     body: JSON.stringify({ text }),
   });
 }
+
+/** Stage 5B: run the matching engine for a request and return results. */
+export function runMatching(requestId: number): Promise<import("../types/matches").Match[]> {
+  return authedRequest(`/api/requests/${requestId}/matches/`, { method: "POST" });
+}
+
+export function getMatches(requestId: number): Promise<import("../types/matches").Match[]> {
+  return authedRequest(`/api/requests/${requestId}/matches/`);
+}
