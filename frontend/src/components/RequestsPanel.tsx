@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { formatApiError } from "../api/auth";
+import { createBooking } from "../api/bookings";
 import {
   createRequest,
   deleteRequest,
@@ -55,6 +56,31 @@ export default function RequestsPanel() {
   // Stage 5B: match results per request id.
   const [matches, setMatches] = useState<Record<number, Match[]>>({});
   const [matchingId, setMatchingId] = useState<number | null>(null);
+
+  // Stage 9: booking directly from a match card.
+  const [bookingMatch, setBookingMatch] = useState<number | null>(null);
+
+  async function handleBook(m: Match) {
+    setError("");
+    setBookingMatch(m.id);
+    try {
+      const booking = await createBooking({
+        request: m.request,
+        resource: m.resource,
+      });
+      setNotice(
+        `Booking #${booking.id} requested with ${m.resource_detail.name} — check the Bookings tab for status.`,
+      );
+      setMatches((prev) => ({
+        ...prev,
+        [m.request]: (prev[m.request] ?? []).filter((x) => x.id !== m.id),
+      }));
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    } finally {
+      setBookingMatch(null);
+    }
+  }
 
   async function handleFindMatches(requestId: number) {
     setError("");
@@ -442,6 +468,14 @@ export default function RequestsPanel() {
                         </li>
                       ))}
                     </ul>
+                    <button
+                      type="button"
+                      onClick={() => void handleBook(m)}
+                      disabled={bookingMatch === m.id}
+                      className="mt-2 rounded-lg bg-green-700 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                    >
+                      {bookingMatch === m.id ? "Booking…" : "Book this space"}
+                    </button>
                   </div>
                 ))}
               </div>

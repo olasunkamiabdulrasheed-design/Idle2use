@@ -5,6 +5,7 @@ Input validation and user creation live in serializers.py.
 Password verification lives in Django's auth system / Simple JWT.
 """
 
+from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -90,3 +91,13 @@ class ProtectedTestView(APIView):
         return Response(
             {"message": "Authentication successful", "user": request.user.username}
         )
+
+
+class UserListView(APIView):
+    """GET /api/users/ � safe directory (id + username) for starting chats."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        users = User.objects.exclude(pk=request.user.pk).order_by("username")
+        return Response([{"id": u.pk, "username": u.username} for u in users])

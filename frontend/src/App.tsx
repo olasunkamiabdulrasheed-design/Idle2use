@@ -12,6 +12,10 @@ import {
   registerUser,
 } from "./api/auth";
 import type { AuthUser, HealthResponse } from "./types/auth";
+import BookingsPanel from "./components/BookingsPanel";
+import DashboardPanel from "./components/DashboardPanel";
+import MessagesPanel from "./components/MessagesPanel";
+import NotificationsBell from "./components/NotificationsBell";
 import ResourcesPanel from "./components/ResourcesPanel";
 import RequestsPanel from "./components/RequestsPanel";
 
@@ -20,20 +24,46 @@ type HealthState =
   | { state: "ok"; data: HealthResponse }
   | { state: "error"; message: string };
 
+type Tab = "dashboard" | "requests" | "resources" | "messages" | "bookings";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "dashboard", label: "Dashboard" },
+  { id: "requests", label: "Requests" },
+  { id: "resources", label: "Resources" },
+  { id: "messages", label: "Messages" },
+  { id: "bookings", label: "Bookings" },
+];
+
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none";
 
-function SectionTitle({ children }: { children: string }) {
+function HealthPill({ health }: { health: HealthState }) {
+  if (health.state === "ok")
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+        <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
+        API connected · {health.data.service}
+      </span>
+    );
+  if (health.state === "error")
+    return (
+      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+        API unreachable
+      </span>
+    );
   return (
-    <h2 className="text-lg font-bold text-slate-900">{children}</h2>
+    <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
+      Checking API…
+    </span>
   );
 }
 
 export default function App() {
   const [health, setHealth] = useState<HealthState>({ state: "loading" });
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [statusMsg, setStatusMsg] = useState("Not authenticated.");
+  const [statusMsg, setStatusMsg] = useState("");
   const [error, setError] = useState("");
+  const [tab, setTab] = useState<Tab>("dashboard");
 
   // Registration form state.
   const [regUsername, setRegUsername] = useState("");
@@ -44,6 +74,7 @@ export default function App() {
   const [regLast, setRegLast] = useState("");
   const [regPhone, setRegPhone] = useState("");
   const [regBusy, setRegBusy] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
   // Login form state.
   const [loginUsername, setLoginUsername] = useState("");
@@ -66,26 +97,20 @@ export default function App() {
         }
       });
 
-    // Restore session if tokens were persisted (MVP localStorage strategy).
     if (getAccessToken()) {
       fetchMe()
         .then((me) => {
-          if (!cancelled) {
-            setUser(me);
-            setStatusMsg(`Authenticated as ${me.username}.`);
-          }
+          if (!cancelled) setUser(me);
         })
         .catch(() => {
           refreshAccessToken()
             .then(() => fetchMe())
             .then((me) => {
-              if (!cancelled) {
-                setUser(me);
-                setStatusMsg(`Authenticated as ${me.username} (token refreshed).`);
-              }
+              if (!cancelled) setUser(me);
             })
             .catch(() => {
-              if (!cancelled) setStatusMsg("Stored session expired. Please log in.");
+              if (!cancelled)
+                setStatusMsg("Stored session expired. Please log in.");
             });
         });
     }
@@ -110,8 +135,10 @@ export default function App() {
         phone: regPhone.trim(),
       });
       setStatusMsg(
-        `Registered ${created.username}. Now log in — registration does not log you in.`,
+        `Registered ${created.username}. Log in to continue — registration does not log you in.`,
       );
+      setAuthMode("login");
+      setLoginUsername(created.username);
     } catch (err: unknown) {
       setError(formatApiError(err));
     } finally {
@@ -129,7 +156,8 @@ export default function App() {
         password: loginPassword,
       });
       setUser(res.user);
-      setStatusMsg(`Authenticated as ${res.user.username}.`);
+      setStatusMsg("");
+      setTab("dashboard");
     } catch (err: unknown) {
       setError(formatApiError(err));
     } finally {
@@ -137,18 +165,15 @@ export default function App() {
     }
   }
 
-  async function handleReloadMe() {
+  async function handleLogout() {
     setError("");
-    try {
-      const me = await fetchMe();
-      setUser(me);
-      setStatusMsg(`Authenticated as ${me.username}.`);
-    } catch (err: unknown) {
-      setError(formatApiError(err));
-    }
+    await logoutUser();
+    setUser(null);
+    setStatusMsg("Logged out.");
+    setLoginPassword("");
   }
 
-  async function handleProtectedTest() {
+  async function handleDevProbe() {
     setError("");
     try {
       const res = await fetchProtectedTest();
@@ -158,148 +183,243 @@ export default function App() {
     }
   }
 
-  async function handleRefresh() {
-    setError("");
-    try {
-      await refreshAccessToken();
-      setStatusMsg("Access token refreshed.");
-    } catch (err: unknown) {
-      setError(formatApiError(err));
-    }
-  }
+  /* ------------------------- logged out: landing ------------------------- */
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-100">
+        <header className="bg-slate-900 text-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <span className="text-lg font-extrabold tracking-tight">
+              Idle<span className="text-green-500">2</span>Use
+            </span>
+            <HealthPill health={health} />
+          </div>
+        </header>
 
-  async function handleLogout() {
-    setError("");
-    await logoutUser();
-    setUser(null);
-    setStatusMsg("Logged out. Refresh token blacklisted; access token expires shortly.");
-  }
-
-  return (
-    <main className="flex min-h-screen items-start justify-center bg-slate-100 p-6">
-      <div className="w-full max-w-4xl space-y-6">
-        {/* Stage 1 health check (unchanged behavior). */}
-        <section className="rounded-2xl bg-white p-8 shadow">
-          <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">
-            Idle2Use · Stage 1 + 2 + 3 + 4
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">
-            Frontend → Backend check
-          </h1>
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            {health.state === "loading" && (
-              <p className="text-slate-600">Contacting the API…</p>
-            )}
-            {health.state === "ok" && (
-              <>
-                <p className="inline-block rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-800">
-                  Connected
-                </p>
-                <pre className="mt-3 overflow-x-auto font-mono text-sm text-slate-800">
-                  {JSON.stringify(health.data, null, 2)}
-                </pre>
-              </>
-            )}
-            {health.state === "error" && (
-              <p className="font-mono text-sm break-all text-red-700">{health.message}</p>
-            )}
+        <section className="bg-slate-900 px-6 pb-20 text-white">
+          <div className="mx-auto max-w-6xl">
+            <p className="text-xs font-bold tracking-[0.2em] text-green-500 uppercase">
+              Hackathon MVP · Capacity exchange platform
+            </p>
+            <h1 className="mt-3 max-w-3xl text-4xl leading-tight font-extrabold sm:text-5xl">
+              Idle capacity, matched to people who need it.
+            </h1>
+            <p className="mt-4 max-w-2xl text-lg text-slate-300">
+              Describe what you need in plain English — Idle2Use parses it,
+              matches it against available spaces, equipment, and services,
+              and gets you to a booking.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3 text-sm">
+              {[
+                "Natural-language requests",
+                "Smart matching engine",
+                "Bookings + reviews",
+              ].map((f) => (
+                <span
+                  key={f}
+                  className="rounded-full border border-slate-700 bg-slate-800 px-4 py-1.5 text-slate-300"
+                >
+                  {f}
+                </span>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* Stage 2 authentication. */}
-        <section className="rounded-2xl bg-white p-8 shadow">
-          <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">
-            Stage 2 · Authentication
-          </p>
-          <p className="mt-2 text-sm text-slate-700">{statusMsg}</p>
-          {error && (
-            <p className="mt-2 rounded-lg bg-red-50 p-3 font-mono text-sm break-all text-red-700">
-              {error}
-            </p>
-          )}
-
-          {user ? (
-            <div className="mt-4 space-y-4">
-              <SectionTitle>Authenticated user</SectionTitle>
-              <pre className="overflow-x-auto rounded-xl bg-slate-50 p-4 font-mono text-sm text-slate-800">
-                {JSON.stringify(user, null, 2)}
-              </pre>
-              <div className="flex flex-wrap gap-2">
+        <main className="mx-auto -mt-12 max-w-6xl px-6 pb-16">
+          <div className="mx-auto max-w-xl rounded-2xl bg-white p-8 shadow-xl">
+            <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+              {(["login", "register"] as const).map((mode) => (
                 <button
+                  key={mode}
                   type="button"
-                  onClick={handleReloadMe}
-                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                  onClick={() => {
+                    setAuthMode(mode);
+                    setError("");
+                  }}
+                  className={`flex-1 rounded-lg px-4 py-2 text-sm font-bold capitalize ${
+                    authMode === mode
+                      ? "bg-white text-slate-900 shadow"
+                      : "text-slate-500"
+                  }`}
                 >
-                  Reload /me
+                  {mode}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleProtectedTest}
-                  className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900"
-                >
-                  Call protected-test
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRefresh}
-                  className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900"
-                >
-                  Refresh token
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white"
-                >
-                  Logout
-                </button>
-              </div>
+              ))}
             </div>
-          ) : (
-            <div className="mt-4 grid gap-6 md:grid-cols-2">
-              <form onSubmit={handleRegister} className="space-y-3">
-                <SectionTitle>Register</SectionTitle>
-                <input className={inputClass} placeholder="username *" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} required />
-                <input className={inputClass} placeholder="email *" type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required />
-                <input className={inputClass} placeholder="password *" type="password" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} required />
-                <input className={inputClass} placeholder="password_confirm *" type="password" value={regPasswordConfirm} onChange={(e) => setRegPasswordConfirm(e.target.value)} required />
-                <input className={inputClass} placeholder="first_name (optional)" value={regFirst} onChange={(e) => setRegFirst(e.target.value)} />
-                <input className={inputClass} placeholder="last_name (optional)" value={regLast} onChange={(e) => setRegLast(e.target.value)} />
-                <input className={inputClass} placeholder="phone (optional)" value={regPhone} onChange={(e) => setRegPhone(e.target.value)} />
-                <button
-                  type="submit"
-                  disabled={regBusy}
-                  className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  {regBusy ? "Registering…" : "POST /api/auth/register/"}
-                </button>
-              </form>
 
-              <form onSubmit={handleLogin} className="space-y-3">
-                <SectionTitle>Login</SectionTitle>
-                <input className={inputClass} placeholder="username" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} required />
-                <input className={inputClass} placeholder="password" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
+            {statusMsg && (
+              <p className="mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
+                {statusMsg}
+              </p>
+            )}
+            {error && (
+              <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm break-all text-red-700">
+                {error}
+              </p>
+            )}
+
+            {authMode === "login" ? (
+              <form onSubmit={handleLogin} className="mt-6 space-y-3">
+                <input
+                  className={inputClass}
+                  placeholder="username"
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  required
+                />
+                <input
+                  className={inputClass}
+                  placeholder="password"
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                />
                 <button
                   type="submit"
                   disabled={loginBusy}
-                  className="w-full rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  className="w-full rounded-lg bg-green-700 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
                 >
-                  {loginBusy ? "Logging in…" : "POST /api/auth/login/"}
+                  {loginBusy ? "Logging in…" : "Log in"}
                 </button>
-                <p className="text-xs text-slate-500">
-                  Tokens are stored in localStorage for this MVP (XSS-readable —
-                  see src/api/auth.ts). Short-lived access + blacklisted refresh
-                  on logout.
-                </p>
               </form>
-            </div>
-          )}
-        </section>
+            ) : (
+              <form onSubmit={handleRegister} className="mt-6 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    className={inputClass}
+                    placeholder="username *"
+                    value={regUsername}
+                    onChange={(e) => setRegUsername(e.target.value)}
+                    required
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="email *"
+                    type="email"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    required
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="password *"
+                    type="password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    required
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="confirm password *"
+                    type="password"
+                    value={regPasswordConfirm}
+                    onChange={(e) => setRegPasswordConfirm(e.target.value)}
+                    required
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="first name"
+                    value={regFirst}
+                    onChange={(e) => setRegFirst(e.target.value)}
+                  />
+                  <input
+                    className={inputClass}
+                    placeholder="last name"
+                    value={regLast}
+                    onChange={(e) => setRegLast(e.target.value)}
+                  />
+                </div>
+                <input
+                  className={inputClass}
+                  placeholder="phone (optional)"
+                  value={regPhone}
+                  onChange={(e) => setRegPhone(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  disabled={regBusy}
+                  className="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                >
+                  {regBusy ? "Creating account…" : "Create account"}
+                </button>
+              </form>
+            )}
 
-        {/* Stage 4 capacity requests + Stage 3 resources (authenticated only). */}
-        {user && <RequestsPanel />}
-        {user && <ResourcesPanel />}
+            <div className="mt-5 flex items-center justify-between text-xs text-slate-500">
+              <button
+                type="button"
+                onClick={handleDevProbe}
+                className="underline hover:text-slate-700"
+              >
+                JWT probe
+              </button>
+              <span>Tokens in localStorage (MVP · see src/api/auth.ts)</span>
+            </div>
+          </div>
+        </main>
       </div>
-    </main>
+    );
+  }
+
+  /* -------------------------- logged in: shell --------------------------- */
+  return (
+    <div className="min-h-screen bg-slate-100">
+      <header className="sticky top-0 z-40 bg-slate-900 text-white shadow">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+          <span className="text-lg font-extrabold tracking-tight">
+            Idle<span className="text-green-500">2</span>Use
+          </span>
+          <nav className="flex flex-wrap gap-1">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTab(t.id)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ${
+                  tab === t.id
+                    ? "bg-green-700 text-white"
+                    : "text-slate-300 hover:bg-slate-800"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center gap-3">
+            <NotificationsBell />
+            <span className="hidden text-sm text-slate-300 sm:inline">
+              {user.username}
+            </span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm font-semibold text-slate-200 hover:bg-slate-800"
+            >
+              Log out
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
+        {tab === "dashboard" && <DashboardPanel />}
+        {tab === "requests" && <RequestsPanel />}
+        {tab === "resources" && <ResourcesPanel />}
+        {tab === "messages" && <MessagesPanel myUsername={user.username} />}
+        {tab === "bookings" && (
+          <BookingsPanel
+            myUserId={user.id}
+            onBooked={() => setTab("bookings")}
+          />
+        )}
+
+        <footer className="flex items-center justify-between pb-4 text-xs text-slate-400">
+          <HealthPill health={health} />
+          <span>Idle2Use hackathon MVP · Django + React</span>
+        </footer>
+      </main>
+    </div>
   );
 }
