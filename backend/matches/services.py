@@ -151,6 +151,8 @@ def find_matches(request, limit=50):
 
 def run_matching_for_request(request):
     """Persist matches for one request; drop rows that no longer qualify."""
+    before = set(Match.objects.filter(request=request).values_list(
+        "pk", flat=True))
     current = find_matches(request)
     kept_ids = set()
     for resource, score, reasons in current:
@@ -161,7 +163,22 @@ def run_matching_for_request(request):
         )
         kept_ids.add(match.pk)
     Match.objects.filter(request=request).exclude(pk__in=kept_ids).delete()
-    return Match.objects.filter(request=request).order_by("-score")
+    result = Match.objects.filter(request=request).order_by("-score")
+    # Stage 7: notify the requester about brand-new matches only.
+    new_ids = set(result.values_list("pk", flat=True)) - before
+    if new_ids:
+        from notifications.models import notify
+
+        best = result.filter(pk__in=new_ids).first()
+        if best:
+            notify(
+                request.requester,
+                "Your request has a new match",
+                f"{best.score}% match — {best.resource.name} "
+                f"({best.resource.location})",
+                f"/requests/{request.pk}",
+            )
+    return result
 
 
 def run_matching_for_resource(resource):

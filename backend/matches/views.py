@@ -79,3 +79,51 @@ class MatchViewSet(
         # Only status is meaningful to update (serializer fields are read-only
         # except status), so accept it via partial update.
         serializer.save()
+
+
+class DashboardView(APIView):
+    """GET /api/dashboard/ — real overview counters for both dashboards."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from bookings.models import Booking
+        from capacity_requests.models import RequestStatus
+        from messaging.models import Conversation, Message
+        from notifications.models import Notification
+        from resources.models import Resource
+        from datetime import date
+
+        user = request.user
+        today = date.today()
+        active_requests = CapacityRequest.objects.filter(
+            requester=user, status=RequestStatus.ACTIVE).count()
+        new_matches = Match.objects.filter(
+            request__requester=user, status="new").count()
+        incoming_matches = Match.objects.filter(
+            resource__owner=user, status="new").count()
+        unread_messages = Message.objects.filter(
+            conversation__participants=user, is_read=False
+        ).exclude(sender=user).count()
+        upcoming_bookings = Booking.objects.filter(
+            requester=user, date__gte=today,
+            status__in=["pending", "confirmed"]).count()
+        provider_bookings = Booking.objects.filter(
+            provider=user, date__gte=today,
+            status__in=["pending", "confirmed"]).count()
+        unread_notifications = Notification.objects.filter(
+            recipient=user, is_read=False).count()
+        my_resources = Resource.objects.filter(owner=user).count()
+        conversations = Conversation.objects.filter(
+            participants=user).count()
+        return Response({
+            "active_requests": active_requests,
+            "new_matches": new_matches,
+            "incoming_matches": incoming_matches,
+            "unread_messages": unread_messages,
+            "upcoming_bookings": upcoming_bookings,
+            "provider_bookings": provider_bookings,
+            "unread_notifications": unread_notifications,
+            "my_resources": my_resources,
+            "conversations": conversations,
+        })

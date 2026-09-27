@@ -3,7 +3,8 @@ Django settings for the Idle2Use project (Stage 1: Project Foundation,
 Stage 2: User registration + JWT authentication,
 Stage 3: Resource + Availability,
 Stage 4: Capacity Requests,
-Stage 5: Matching Engine).
+Stage 5: Matching Engine,
+Stages 7-10: Notifications, Messaging, Bookings, Reviews).
 
 Configuration is read from environment variables (see backend/.env.example).
 If PostgreSQL variables are not set, the project falls back to a local
@@ -54,6 +55,9 @@ INSTALLED_APPS = [
     "resources",
     "capacity_requests",
     "matches",
+    "notifications",
+    "messaging",
+    "bookings",
 ]
 
 MIDDLEWARE = [

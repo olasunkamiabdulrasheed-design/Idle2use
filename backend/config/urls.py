@@ -26,4 +26,7 @@ urlpatterns = [
     path("api/", include("resources.urls")),
     path("api/", include("capacity_requests.urls")),
     path("api/", include("matches.urls")),
+    path("api/", include("notifications.urls")),
+    path("api/", include("messaging.urls")),
+    path("api/", include("bookings.urls")),
 ]
