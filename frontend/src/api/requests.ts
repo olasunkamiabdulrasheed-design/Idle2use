@@ -8,6 +8,7 @@ import type { ApiErrorData } from "../types/auth";
 import type {
   CapacityRequest,
   CapacityRequestPayload,
+  ParseResponse,
   RequestFilters,
 } from "../types/requests";
 import { API_BASE_URL, ApiError, getAccessToken } from "./auth";
@@ -60,4 +61,12 @@ export function updateRequest(
 
 export function deleteRequest(id: number): Promise<void> {
   return authedRequest<void>(`/api/requests/${id}/`, { method: "DELETE" });
+}
+
+/** Stage 4B: NL text → sanitized structured suggestion (never persists). */
+export function parseRequestText(text: string): Promise<ParseResponse> {
+  return authedRequest<ParseResponse>("/api/requests/parse/", {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  });
 }

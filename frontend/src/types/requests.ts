@@ -49,3 +49,11 @@ export interface CapacityRequestPayload {
 export interface RequestFilters {
   status?: string;
 }
+
+/** Stage 4B: POST /api/requests/parse/ response. */
+export interface ParseResponse {
+  original_text: string;
+  suggestion: Partial<CapacityRequest>;
+  warnings: string[];
+  parser: "ai" | "fallback" | null;
+}

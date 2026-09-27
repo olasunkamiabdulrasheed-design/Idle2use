@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { formatApiError } from "../api/auth";
-import { createRequest, deleteRequest, listRequests, updateRequest } from "../api/requests";
+import {
+  createRequest,
+  deleteRequest,
+  listRequests,
+  parseRequestText,
+  updateRequest,
+} from "../api/requests";
 import type { CapacityRequest, RequestCategory, RequestStatus } from "../types/requests";
 
 const inputClass =
@@ -37,6 +43,13 @@ export default function RequestsPanel() {
   const [form, setForm] = useState(emptyForm);
   const [busy, setBusy] = useState(false);
 
+  // Stage 4B: natural-language understanding.
+  const [nlText, setNlText] = useState("");
+  const [parsing, setParsing] = useState(false);
+  const [parseWarnings, setParseWarnings] = useState<string[]>([]);
+  const [understood, setUnderstood] = useState(false);
+  const [parserSource, setParserSource] = useState<string>("");
+
   async function load(status = "") {
     setLoading(true);
     setError("");
@@ -53,6 +66,39 @@ export default function RequestsPanel() {
   useEffect(() => {
     void load();
   }, []);
+
+  async function handleParse(e: FormEvent) {
+    e.preventDefault();
+    setError("");
+    setParseWarnings([]);
+    setUnderstood(false);
+    setParsing(true);
+    try {
+      const res = await parseRequestText(nlText.trim());
+      const s = res.suggestion;
+      setForm((prev) => ({
+        ...prev,
+        category: (s.category as RequestCategory) ?? prev.category,
+        resource_type: s.resource_type ?? prev.resource_type,
+        location: s.location ?? prev.location,
+        capacity_required:
+          s.capacity_required != null ? String(s.capacity_required) : prev.capacity_required,
+        date: s.date ?? prev.date,
+        start_time: s.start_time ?? prev.start_time,
+        end_time: s.end_time ?? prev.end_time,
+        purpose: s.purpose ?? prev.purpose,
+        requirements: s.requirements ?? prev.requirements,
+        original_text: res.original_text,
+      }));
+      setParseWarnings(res.warnings);
+      setParserSource(res.parser === "ai" ? "AI" : "rule-based");
+      setUnderstood(true);
+    } catch (err: unknown) {
+      setError(formatApiError(err));
+    } finally {
+      setParsing(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -121,6 +167,39 @@ export default function RequestsPanel() {
           {error}
         </p>
       )}
+
+      {/* Stage 4B: hero natural-language input. */}
+      <form onSubmit={handleParse} className="mt-4 rounded-xl border border-slate-200 bg-slate-900 p-5 text-white">
+        <label htmlFor="nl-input" className="text-sm font-semibold">
+          What capacity do you need?
+        </label>
+        <textarea
+          id="nl-input"
+          value={nlText}
+          onChange={(e) => setNlText(e.target.value)}
+          placeholder="I need a classroom for 20 people in Ikeja tomorrow from 10am to 4pm…"
+          rows={3}
+          required
+          className="mt-2 w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:border-green-400 focus:outline-none"
+        />
+        <button
+          type="submit"
+          disabled={parsing}
+          className="mt-2 rounded-lg bg-green-600 px-5 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:opacity-50"
+        >
+          {parsing ? "Understanding your request…" : "Find capacity"}
+        </button>
+        {understood && (
+          <div className="mt-3 rounded-lg bg-slate-800 p-3 text-sm">
+            <p className="font-semibold text-green-400">
+              Understood ({parserSource} parser) — review and confirm below.
+            </p>
+            {parseWarnings.map((w) => (
+              <p key={w} className="mt-1 text-amber-300">⚠ {w}</p>
+            ))}
+          </div>
+        )}
+      </form>
 
       <form onSubmit={handleSubmit} className="mt-4 grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2">
         <select
