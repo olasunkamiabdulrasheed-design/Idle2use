@@ -1,10 +1,13 @@
 """Stage 4 tests: CapacityRequest CRUD, ownership, validation, lifecycle."""
 
+from datetime import date, timedelta
+
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient, APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from capacity_requests.models import CapacityRequest, RequestStatus
+from capacity_requests.parsers import fallback_parse, sanitize_suggestion
 
 PASSWORD = "StrongPassword123!"
 
@@ -183,3 +186,90 @@ class CapacityRequestTests(APITestCase):
         self.assertEqual(stored.original_text, REQUEST_BODY["original_text"])
         # No structured data yet in Stage 4 (parser arrives in 4B).
         self.assertIsNone(stored.structured_data)
+
+
+class ParseRequestTests(APITestCase):
+    """Stage 4B: NL parsing endpoint + fallback parser + sanitization."""
+
+    DEMO = "I need a classroom for 20 people in Ikeja tomorrow from 10am to 4pm."
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="parser", email="parser@example.com", password=PASSWORD
+        )
+        self.client_auth = auth_client(self.user)
+
+    def parse(self, text, client=None):
+        client = client or self.client_auth
+        return client.post("/api/requests/parse/", {"text": text}, format="json")
+
+    def test_p1_parse_requires_authentication(self):
+        res = self.client.post(
+            "/api/requests/parse/", {"text": self.DEMO}, format="json"
+        )
+        self.assertEqual(res.status_code, 401)
+
+    def test_p2_parse_rejects_too_short_text(self):
+        res = self.parse("hi")
+        self.assertEqual(res.status_code, 400)
+
+    def test_p3_fallback_parses_demo_sentence(self):
+        res = self.parse(self.DEMO)
+        self.assertEqual(res.status_code, 200, res.content)
+        data = res.data
+        self.assertEqual(data["original_text"], self.DEMO)
+        s = data["suggestion"]
+        self.assertEqual(s["category"], "space")
+        self.assertEqual(s["resource_type"], "classroom")
+        self.assertEqual(s["location"], "Ikeja")
+        self.assertEqual(s["capacity_required"], 20)
+        self.assertEqual(s["start_time"], "10:00")
+        self.assertEqual(s["end_time"], "16:00")
+        expected = (date.today() + timedelta(days=1)).isoformat()
+        self.assertEqual(s["date"], expected)
+        self.assertEqual(data["parser"], "fallback")
+
+    def test_p4_suggestion_creates_valid_request(self):
+        s = self.parse(self.DEMO).data["suggestion"]
+        res = self.client_auth.post("/api/requests/", s, format="json")
+        self.assertEqual(res.status_code, 201, res.content)
+        stored = CapacityRequest.objects.get(pk=res.data["id"])
+        self.assertEqual(stored.original_text, self.DEMO)
+
+    def test_p5_sanitization_drops_invalid_fields(self):
+        clean, warnings, _ = sanitize_suggestion(
+            {"category": "spaceships", "capacity_required": -5,
+             "date": "not-a-date", "start_time": "25:99",
+             "location": "Ikeja"}
+        )
+        self.assertNotIn("category", clean)
+        self.assertNotIn("capacity_required", clean)
+        self.assertNotIn("date", clean)
+        self.assertNotIn("start_time", clean)
+        self.assertEqual(clean["location"], "Ikeja")
+        self.assertTrue(warnings)
+
+    def test_p6_sanitization_drops_inverted_times(self):
+        clean, warnings, _ = sanitize_suggestion(
+            {"start_time": "16:00", "end_time": "10:00"}
+        )
+        self.assertNotIn("start_time", clean)
+        self.assertNotIn("end_time", clean)
+        self.assertTrue(any("End time" in w for w in warnings))
+
+    def test_p7_fallback_detects_other_categories(self):
+        self.assertEqual(
+            fallback_parse("I need a projector for 30 people tomorrow "
+                           "from 2pm to 6pm")["category"],
+            "equipment",
+        )
+        self.assertEqual(
+            fallback_parse("I need somewhere to store 30 boxes in Ikeja "
+                           "for two weeks")["category"],
+            "storage",
+        )
+        self.assertEqual(
+            fallback_parse("I need to move 10 cartons from Ota to Ikeja "
+                           "tomorrow morning")["category"],
+            "transportation",
+        )

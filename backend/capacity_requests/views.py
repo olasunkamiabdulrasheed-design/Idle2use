@@ -8,9 +8,34 @@ UX only; this is the security boundary.
 
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import CapacityRequest
+from .parsers import parse_request_text
 from .serializers import CapacityRequestSerializer
+
+
+class ParseRequestView(APIView):
+    """POST /api/requests/parse/ — NL text → sanitized structured suggestion.
+
+    Never persists. AI/fallback output is sanitized (unknown fields dropped
+    with warnings); the frontend shows it for confirmation, and actual
+    creation still goes through CapacityRequestSerializer validation.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        text = str(request.data.get("text", "") or "")
+        if len(text.strip()) < 5:
+            return Response(
+                {"detail": "Please describe what you need (at least 5 characters)."},
+                status=400,
+            )
+        if len(text) > 2000:
+            return Response({"detail": "Request text is too long."}, status=400)
+        return Response(parse_request_text(text))
 
 
 class CapacityRequestViewSet(viewsets.ModelViewSet):
