@@ -29,7 +29,7 @@ services:
       # Frontend origin — update to your real Vercel URL after the
       # Vercel deployment exists (e.g. https://idle2use.vercel.app).
       - key: CORS_ALLOWED_ORIGINS
-        value: "http://localhost:5173,http://127.0.0.1:5174"
+        value: "https://idle2use.vercel.app"
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://idle2use-api.onrender.com"
       - key: DATABASE_URL
