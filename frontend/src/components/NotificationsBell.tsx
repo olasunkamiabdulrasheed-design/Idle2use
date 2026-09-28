@@ -1,6 +1,7 @@
 /** Stage 7: notification bell with unread badge + dropdown. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Bell } from "lucide-react";
 import {
   listNotifications,
   markAllNotificationsRead,
@@ -59,7 +60,7 @@ export default function NotificationsBell() {
         className="relative rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
         aria-label="Notifications"
       >
-        🔔
+        <Bell className="h-4 w-4" />
         {unread > 0 && (
           <span className="absolute -top-1.5 -right-1.5 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
             {unread}
@@ -67,7 +68,7 @@ export default function NotificationsBell() {
         )}
       </button>
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-lg">
+        <div className="absolute right-0 z-50 mt-2 w-[calc(100vw-2rem)] max-w-80 rounded-xl border border-slate-200 bg-white shadow-lg">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2">
             <span className="text-sm font-bold text-slate-900">
               Notifications

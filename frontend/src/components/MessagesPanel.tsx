@@ -102,7 +102,8 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
       )}
 
       <div className="mt-4 grid gap-4 md:grid-cols-[260px_1fr]">
-        <div className="space-y-3">
+        {/* Conversation list — hidden on mobile while a thread is open */}
+        <div className={`space-y-3 ${activeId !== null ? "hidden md:block" : ""}`}>
           <form onSubmit={handleStart} className="flex gap-2">
             <select
               className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
@@ -154,14 +155,21 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
           </ul>
         </div>
 
-        <div className="flex h-80 flex-col rounded-xl border border-slate-200">
+        <div className="flex h-96 flex-col rounded-xl border border-slate-200 md:h-80">
           {activeId === null ? (
             <div className="flex flex-1 items-center justify-center p-4 text-sm text-slate-500">
               Select or start a conversation.
             </div>
           ) : (
             <>
-              <div className="flex-1 space-y-2 overflow-y-auto p-3">
+              <button
+                type="button"
+                onClick={() => setActiveId(null)}
+                className="m-2 mb-0 w-fit rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 md:hidden"
+              >
+                ← Back to conversations
+              </button>
+              <div className="mt-2 flex-1 space-y-2 overflow-y-auto p-3">
                 {messages.map((m) => (
                   <div
                     key={m.id}
