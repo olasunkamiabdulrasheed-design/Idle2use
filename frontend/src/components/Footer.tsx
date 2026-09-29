@@ -1,6 +1,6 @@
 /** Shared site footer (landing + auth pages). */
 
-import { Globe, Mail, MessageCircle, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../authContext";
 
@@ -51,18 +51,6 @@ export default function Footer() {
               vehicles into opportunity — or find exactly what you need, when
               you need it.
             </p>
-            <div className="mt-4 flex gap-3">
-              {[Globe, Mail, MessageCircle].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  aria-label="Social link"
-                  className="rounded-lg border border-white/10 p-2 transition-colors hover:border-green-500 hover:text-green-400"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {COLUMNS.map((col) => (
