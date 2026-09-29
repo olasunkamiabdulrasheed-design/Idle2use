@@ -1,8 +1,10 @@
 /** About page — what Idle2Use is, the problem, how it works, categories. */
 
-import { ArrowRight, Search, Sparkles, Target } from "lucide-react";
+import { ArrowRight, Sparkles, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { CATEGORIES, STEPS, TRUST } from "../constants/site";
 
 const PROBLEM = [
@@ -21,33 +23,11 @@ const PROBLEM = [
 ];
 
 export default function About() {
+  usePageTitle("About");
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0a1428] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-lg font-extrabold text-white">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-              <Search className="h-4 w-4" />
-            </span>
-            Idle<span className="text-green-500">2</span>Use
-          </Link>
-          <nav className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-semibold text-white hover:bg-white/10 sm:px-4"
-            >
-              Home
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-green-700 sm:px-4"
-            >
-              Get Started
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
         {/* Intro */}
