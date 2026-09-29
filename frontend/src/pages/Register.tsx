@@ -6,6 +6,8 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Eye,
+  EyeOff,
   Mail,
   Phone,
   ShieldCheck,
@@ -13,6 +15,7 @@ import {
 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { formatApiError, useAuth } from "../authContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100";
@@ -29,9 +32,12 @@ export default function Register() {
     last_name: "",
     phone: "",
   });
+  const [showPasswords, setShowPasswords] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+
+  usePageTitle("Register");
 
   if (user) return <Navigate to="/app" replace />;
 
@@ -138,6 +144,7 @@ export default function Register() {
             <input
               className={inputClass}
               placeholder="username *"
+              aria-label="Username"
               autoComplete="username"
               value={form.username}
               onChange={(e) => set("username", e.target.value)}
@@ -149,17 +156,32 @@ export default function Register() {
                 className={`${inputClass} pl-9`}
                 type="email"
                 placeholder="email *"
+                aria-label="Email"
                 autoComplete="email"
                 value={form.email}
                 onChange={(e) => set("email", e.target.value)}
                 required
               />
             </div>
+            <button
+              type="button"
+              onClick={() => setShowPasswords((v) => !v)}
+              aria-pressed={showPasswords}
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:outline-none"
+            >
+              {showPasswords ? (
+                <EyeOff className="h-3.5 w-3.5" />
+              ) : (
+                <Eye className="h-3.5 w-3.5" />
+              )}
+              {showPasswords ? "Hide passwords" : "Show passwords"}
+            </button>
             <div className="grid grid-cols-2 gap-3">
               <input
                 className={inputClass}
-                type="password"
+                type={showPasswords ? "text" : "password"}
                 placeholder="password *"
+                aria-label="Password"
                 autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => set("password", e.target.value)}
@@ -167,8 +189,9 @@ export default function Register() {
               />
               <input
                 className={inputClass}
-                type="password"
+                type={showPasswords ? "text" : "password"}
                 placeholder="confirm *"
+                aria-label="Confirm password"
                 autoComplete="new-password"
                 value={form.password_confirm}
                 onChange={(e) => set("password_confirm", e.target.value)}
@@ -177,12 +200,16 @@ export default function Register() {
               <input
                 className={inputClass}
                 placeholder="first name"
+                aria-label="First name"
+                autoComplete="given-name"
                 value={form.first_name}
                 onChange={(e) => set("first_name", e.target.value)}
               />
               <input
                 className={inputClass}
                 placeholder="last name"
+                aria-label="Last name"
+                autoComplete="family-name"
                 value={form.last_name}
                 onChange={(e) => set("last_name", e.target.value)}
               />
@@ -192,6 +219,7 @@ export default function Register() {
               <input
                 className={`${inputClass} pl-9`}
                 placeholder="phone (optional)"
+                aria-label="Phone (optional)"
                 autoComplete="tel"
                 value={form.phone}
                 onChange={(e) => set("phone", e.target.value)}
