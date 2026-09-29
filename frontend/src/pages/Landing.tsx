@@ -2,35 +2,27 @@
  * Responsive from 320px up: hamburger nav, stacked CTAs, single-column
  * mobile layouts, no horizontal overflow. */
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   ArrowRight,
   Boxes,
-  Menu,
   Search,
   ShieldCheck,
   Sparkles,
-  X,
-  Zap,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 import { useAuth } from "../authContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { CATEGORIES, STEPS, TRUST } from "../constants/site";
-
-const NAV_LINKS = [
-  { label: "Home", to: "/" },
-  { label: "How It Works", to: "/#how" },
-  { label: "Categories", to: "/#categories" },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" },
-];
 
 export default function Landing() {
   const { user } = useAuth();
   const { hash } = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
   const appLink = user ? "/app" : "/register";
+
+  usePageTitle();
 
   // Smooth-scroll to section when arriving with a hash (e.g. from /about).
   useEffect(() => {
@@ -43,115 +35,9 @@ export default function Landing() {
     return () => window.clearTimeout(t);
   }, [hash]);
 
-  function closeMenu() {
-    setMenuOpen(false);
-  }
-
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0a1428] text-white">
-      {/* Header */}
-      <header className="relative border-b border-white/10">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <Link
-            to="/"
-            className="flex shrink-0 items-center gap-2 text-lg font-extrabold text-white"
-            onClick={closeMenu}
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-              <Zap className="h-4 w-4 text-white" fill="currentColor" />
-            </span>
-            Idle<span className="text-green-500">2</span>Use
-          </Link>
-
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
-            {NAV_LINKS.map((l) => (
-              <Link key={l.label} to={l.to} className="hover:text-white">
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Desktop CTAs */}
-          <div className="hidden items-center gap-3 md:flex">
-            <Link
-              to="/login"
-              className="rounded-lg border border-white/20 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/10"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-green-700"
-            >
-              Get Started
-            </Link>
-          </div>
-
-          {/* Mobile hamburger (visible below md) */}
-          <button
-            type="button"
-            className="rounded-lg border border-white/20 p-2 text-white md:hidden"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            {menuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-
-        {/* Mobile menu dropdown */}
-        {menuOpen && (
-          <>
-            {/* Click-outside layer */}
-            <div
-              className="fixed inset-0 z-40 bg-black/60 md:hidden"
-              onClick={closeMenu}
-              aria-hidden="true"
-            />
-            <nav
-              id="mobile-menu"
-              aria-label="Mobile navigation"
-              className="absolute inset-x-0 top-full z-50 border-b border-white/10 bg-[#0a1428] px-4 py-4 shadow-2xl md:hidden"
-            >
-              <ul className="space-y-1">
-                {NAV_LINKS.map((l) => (
-                  <li key={l.label}>
-                    <Link
-                      to={l.to}
-                      onClick={closeMenu}
-                      className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-200 hover:bg-white/10 hover:text-white"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
-                <Link
-                  to="/login"
-                  onClick={closeMenu}
-                  className="rounded-lg border border-white/20 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/10"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={closeMenu}
-                  className="rounded-lg bg-green-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-green-700"
-                >
-                  Get Started
-                </Link>
-              </div>
-            </nav>
-          </>
-        )}
-      </header>
+      <Navbar />
 
       {/* Hero */}
       <section
@@ -286,8 +172,15 @@ export default function Landing() {
             {STEPS.map(({ Icon, title, desc }, i) => (
               <div
                 key={title}
-                className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6"
+                className="relative rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6"
               >
+                {/* Connector arrow between steps (desktop only) */}
+                {i < STEPS.length - 1 && (
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="absolute top-1/2 -right-[1.65rem] hidden h-5 w-5 -translate-y-1/2 text-green-500/50 md:block"
+                  />
+                )}
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-sm font-extrabold text-white">
                   {i + 1}
                 </span>
