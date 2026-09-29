@@ -17,9 +17,9 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
     title: "Company",
     links: [
-      { label: "About", to: "/#trust" },
+      { label: "About", to: "/about" },
+      { label: "Contact", to: "/contact" },
       { label: "Trust & safety", to: "/#trust" },
-      { label: "Contact", to: "/#trust" },
     ],
   },
   {
@@ -36,8 +36,8 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-white/10 bg-[#070e1d] text-slate-400">
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           {/* Brand */}
           <div>
             <span className="flex items-center gap-2 text-lg font-extrabold text-white">
@@ -86,7 +86,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-center text-xs sm:flex-row sm:text-left">
           <span>© {new Date().getFullYear()} Idle2Use. Built for the hackathon demo.</span>
           <span className="inline-flex items-center gap-2">
             <span
