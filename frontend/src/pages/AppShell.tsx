@@ -1,18 +1,25 @@
-/** Authenticated shell: sidebar navigation + topbar + routed app pages. */
+/** Authenticated shell: sidebar navigation + topbar + routed app pages.
+ * Desktop: fixed sidebar. Mobile: hamburger + off-canvas drawer with
+ * backdrop, Escape close, and a reusable back control on sub-pages. */
 
+import { useEffect, useState } from "react";
 import {
   Boxes,
   CalendarDays,
   LayoutDashboard,
   LifeBuoy,
   LogOut,
+  Menu,
   MessageSquare,
   Search,
   User as UserIcon,
+  X,
   Zap,
 } from "lucide-react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../authContext";
+import { usePageTitle } from "../hooks/usePageTitle";
+import MobileBackButton from "../components/MobileBackButton";
 import NotificationsBell from "../components/NotificationsBell";
 import PageHeader from "../components/PageHeader";
 import BookingsPanel from "../components/BookingsPanel";
@@ -29,6 +36,16 @@ const NAV = [
   { to: "/app/resources", label: "Resources", icon: Boxes },
   { to: "/app/profile", label: "Profile", icon: UserIcon },
 ];
+
+const TITLES: Record<string, string> = {
+  "/app": "Dashboard",
+  "/app/": "Dashboard",
+  "/app/find": "Requests",
+  "/app/messages": "Messages",
+  "/app/bookings": "Bookings",
+  "/app/resources": "Resources",
+  "/app/profile": "Profile",
+};
 
 function PageHeaderFor({ path, username }: { path: string; username: string }) {
   switch (path) {
@@ -95,6 +112,25 @@ function PageHeaderFor({ path, username }: { path: string; username: string }) {
 export default function AppShell() {
   const { user, logout, restoring } = useAuth();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isRoot = location.pathname === "/app" || location.pathname === "/app/";
+
+  usePageTitle(TITLES[location.pathname]);
+
+  // Close the drawer on route change.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  // Escape closes the drawer.
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   if (restoring) {
     return (
@@ -105,32 +141,37 @@ export default function AppShell() {
   }
   if (!user) return <Navigate to="/login" replace />;
 
-  const sidebar = (
+  const sidebarContent = (
     <div className="flex h-full flex-col">
       <NavLink
         to="/app"
         className="flex items-center gap-2 px-5 py-5 text-lg font-extrabold text-white"
+        onClick={() => setMenuOpen(false)}
       >
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
           <Zap className="h-4 w-4 text-white" fill="currentColor" />
         </span>
         Idle<span className="text-green-500">2</span>Use
       </NavLink>
-      <nav className="flex-1 space-y-1 px-3">
+      <nav
+        aria-label="Dashboard navigation"
+        className="flex-1 space-y-1 px-3"
+      >
         {NAV.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
+            onClick={() => setMenuOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+              `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none ${
                 isActive
                   ? "bg-green-600 text-white"
                   : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`
             }
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-4 w-4 shrink-0" />
             {label}
           </NavLink>
         ))}
@@ -140,13 +181,15 @@ export default function AppShell() {
           <LifeBuoy className="h-4 w-4 text-green-400" /> Need help?
         </span>
         <p className="mt-1 text-[11px] text-slate-400">
-          Check the How It Works section on the landing page or contact
-          support.
+          See How It Works on the landing page for a quick walkthrough.
         </p>
       </div>
       <button
         type="button"
-        onClick={() => void logout()}
+        onClick={() => {
+          setMenuOpen(false);
+          void logout();
+        }}
         className="m-3 mt-0 flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-sm font-semibold text-slate-300 hover:bg-white/10"
       >
         <LogOut className="h-4 w-4" /> Log out
@@ -155,9 +198,23 @@ export default function AppShell() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen overflow-x-hidden bg-slate-100">
       {/* Mobile top bar */}
       <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-white/10 bg-[#0a1428] px-4 py-3 text-white lg:hidden">
+        <button
+          type="button"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          aria-controls="dashboard-mobile-menu"
+          className="rounded-lg border border-white/20 p-2 hover:bg-white/10"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
+        </button>
         <NavLink to="/app" className="flex items-center gap-2 font-extrabold">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
             <Zap className="h-4 w-4" fill="currentColor" />
@@ -177,9 +234,31 @@ export default function AppShell() {
         </div>
       </header>
 
-      {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 bg-[#0a1428] lg:block">
-        {sidebar}
+      {/* Off-canvas drawer (mobile) */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <aside
+        id="dashboard-mobile-menu"
+        aria-label="Dashboard menu"
+        className={`fixed inset-y-0 left-0 z-50 w-64 max-w-[80vw] bg-[#0a1428] transition-transform duration-200 lg:translate-x-0 lg:block ${
+          menuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Close button inside drawer (mobile) */}
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="absolute top-4 right-3 rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+          onClick={() => setMenuOpen(false)}
+        >
+          <X className="h-5 w-5" />
+        </button>
+        {sidebarContent}
       </aside>
 
       {/* Main column */}
@@ -199,12 +278,13 @@ export default function AppShell() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white">
                 {user.username.slice(0, 2).toUpperCase()}
               </span>
-              {user.username}
+              <span className="max-w-32 truncate">{user.username}</span>
             </span>
           </div>
         </header>
 
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          {!isRoot && <MobileBackButton to="/app" label="Back to Dashboard" />}
           <PageHeaderFor path={location.pathname} username={user.username} />
           <Outlet />
         </main>
@@ -243,7 +323,7 @@ export function ProfilePage() {
   return (
     <section className="max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-center gap-4">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-xl font-extrabold text-white">
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-green-600 text-xl font-extrabold text-white">
           {user.username.slice(0, 2).toUpperCase()}
         </span>
         <div className="min-w-0">
@@ -258,10 +338,7 @@ export function ProfilePage() {
       <dl className="mt-5 space-y-2 text-sm">
         {[
           ["Phone", user.profile.phone || "—"],
-          [
-            "Phone verified",
-            user.profile.is_phone_verified ? "Yes" : "Not yet",
-          ],
+          ["Phone verified", user.profile.is_phone_verified ? "Yes" : "Not yet"],
           [
             "Identity verified",
             user.profile.is_identity_verified ? "Yes" : "Not yet",
@@ -269,14 +346,14 @@ export function ProfilePage() {
         ].map(([label, value]) => (
           <div
             key={label}
-            className="flex justify-between border-t border-slate-100 pt-2"
+            className="flex justify-between gap-4 border-t border-slate-100 pt-2"
           >
             <dt className="text-slate-500">{label}</dt>
             <dd
               className={
                 value === "Yes"
                   ? "font-bold text-green-700"
-                  : "font-semibold text-slate-800"
+                  : "text-right font-semibold text-slate-800"
               }
             >
               {value}
