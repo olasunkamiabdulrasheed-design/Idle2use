@@ -1,26 +1,19 @@
 /** 404 — branded not-found page. */
 
-import { ArrowLeft, Compass, Search } from "lucide-react";
+import { ArrowLeft, Compass } from "lucide-react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import Navbar from "../components/Navbar";
 import { useAuth } from "../authContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 export default function NotFound() {
   const { user } = useAuth();
+  usePageTitle("Page not found");
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#0a1428] text-white">
-      {/* Header */}
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-6xl items-center px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-lg font-extrabold text-white">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-              <Search className="h-4 w-4" />
-            </span>
-            Idle<span className="text-green-500">2</span>Use
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Content */}
       <main className="flex flex-1 items-center justify-center px-4 py-16">
