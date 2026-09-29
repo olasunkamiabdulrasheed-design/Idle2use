@@ -2,9 +2,18 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowLeft, ArrowRight, Lock, ShieldCheck, User } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Lock,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { formatApiError, useAuth } from "../authContext";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100";
@@ -14,8 +23,11 @@ export default function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  usePageTitle("Login");
 
   if (user) return <Navigate to="/app" replace />;
 
@@ -95,12 +107,16 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="mt-5 space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-600">
+                <label
+                  htmlFor="login-username"
+                  className="text-xs font-bold text-slate-600"
+                >
                   Username
                 </label>
                 <div className="relative mt-1">
                   <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
+                    id="login-username"
                     className={`${inputClass} pl-9`}
                     placeholder="your_username"
                     autoComplete="username"
@@ -111,20 +127,38 @@ export default function Login() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold text-slate-600">
+                <label
+                  htmlFor="login-password"
+                  className="text-xs font-bold text-slate-600"
+                >
                   Password
                 </label>
                 <div className="relative mt-1">
                   <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
-                    className={`${inputClass} pl-9`}
-                    type="password"
+                    id="login-password"
+                    className={`${inputClass} pr-10 pl-9`}
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
               <button
