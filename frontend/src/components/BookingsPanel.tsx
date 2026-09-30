@@ -1,7 +1,7 @@
 /** Stage 9/10: bookings lifecycle + reviews. */
 
 import { useCallback, useEffect, useState } from "react";
-import { formatApiError } from "../api/auth";
+import { friendlyError } from "../api/auth";
 import {
   createReview,
   listBookings,
@@ -48,7 +48,7 @@ export default function BookingsPanel({
       setReviews(r);
       setError("");
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }, []);
 
@@ -62,7 +62,7 @@ export default function BookingsPanel({
       await refresh();
       onBooked?.();
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -75,7 +75,7 @@ export default function BookingsPanel({
       setRating(5);
       await refresh();
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -158,7 +158,7 @@ export default function BookingsPanel({
   return (
     <section className="rounded-2xl bg-white p-6 shadow">
       <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
-        Stage 9 + 10 · Bookings & Reviews
+        Bookings & Reviews
       </p>
       <h2 className="text-lg font-bold text-slate-900">Bookings</h2>
       {error && (

@@ -7,7 +7,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "../api/notifications";
-import { formatApiError } from "../api/auth";
+import { friendlyError } from "../api/auth";
 import type { Notification } from "../types/notifications";
 
 export default function NotificationsBell() {
@@ -21,7 +21,7 @@ export default function NotificationsBell() {
       setItems(await listNotifications());
       setError("");
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }, []);
 
@@ -46,7 +46,7 @@ export default function NotificationsBell() {
       try {
         await markNotificationRead(n.id);
       } catch (err: unknown) {
-        setError(formatApiError(err));
+        setError(friendlyError(err));
       }
     }
     refresh();

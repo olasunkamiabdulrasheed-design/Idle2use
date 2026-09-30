@@ -1,7 +1,7 @@
 /** Stage 8: conversations list + thread + new conversation. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { formatApiError } from "../api/auth";
+import { friendlyError } from "../api/auth";
 import {
   createConversation,
   listConversations,
@@ -32,7 +32,7 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
       setUsers(opts);
       setError("");
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }, []);
 
@@ -44,7 +44,7 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
     if (activeId === null) return;
     listMessages(activeId)
       .then(setMessages)
-      .catch((err: unknown) => setError(formatApiError(err)));
+      .catch((err: unknown) => setError(friendlyError(err)));
     // Mark-read happens server-side on GET.
     refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,7 +69,7 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
       setNewUser("");
       await refresh();
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setBusy(false);
     }
@@ -85,14 +85,14 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
       setMessages((prev) => [...prev, msg]);
       await refresh();
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
   return (
     <section className="rounded-2xl bg-white p-6 shadow">
       <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
-        Stage 8 · Messages
+        Messages
       </p>
       <h2 className="text-lg font-bold text-slate-900">Conversations</h2>
       {error && (
