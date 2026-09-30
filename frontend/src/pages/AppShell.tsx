@@ -110,7 +110,7 @@ function PageHeaderFor({ path, username }: { path: string; username: string }) {
 }
 
 export default function AppShell() {
-  const { user, logout, restoring } = useAuth();
+  const { user, logout, restoring, refreshing } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const isRoot = location.pathname === "/app" || location.pathname === "/app/";
@@ -222,6 +222,15 @@ export default function AppShell() {
           Idle<span className="text-green-500">2</span>Use
         </NavLink>
         <div className="ml-auto flex items-center gap-3">
+          {refreshing && (
+            <span
+              role="status"
+              className="hidden items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700 sm:inline-flex"
+            >
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+              Refreshing your session…
+            </span>
+          )}
           <NotificationsBell />
           <button
             type="button"
@@ -273,6 +282,15 @@ export default function AppShell() {
             />
           </div>
           <div className="ml-auto flex items-center gap-4">
+            {refreshing && (
+              <span
+                role="status"
+                className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700"
+              >
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+                Refreshing your session…
+              </span>
+            )}
             <NotificationsBell />
             <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white">
@@ -296,7 +314,8 @@ export default function AppShell() {
 /* ---------- thin routed pages (each page = header + working panel) ------ */
 
 export function DashboardPage() {
-  return <DashboardPanel />;
+  const { user } = useAuth();
+  return <DashboardPanel username={user?.username} />;
 }
 
 export function FindPage() {
