@@ -15,7 +15,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../authContext";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { CATEGORIES, STEPS, TRUST } from "../constants/site";
+import { CATEGORIES, TRUST } from "../constants/site";
 
 export default function Landing() {
   const { user } = useAuth();
@@ -162,36 +162,45 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* How it works: 1 col mobile, 3 col md+ */}
+      {/* How it works preview — full section lives at /how-it-works */}
       <section id="how" className="border-t border-white/10 bg-white/[0.03]">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
-          <h2 className="text-center text-xl font-extrabold text-white sm:text-3xl">
-            How it works
-          </h2>
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {STEPS.map(({ Icon, title, desc }, i) => (
+          <div className="max-w-2xl">
+            <h2 className="text-xl font-extrabold text-white sm:text-3xl">
+              How Idle2Use works
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-400 sm:text-base">
+              Describe what you need — or what you have. Idle2Use matches both
+              sides, then you connect and book through the platform.
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              ["01", "Describe", "Plain English in, structured request out."],
+              ["02", "Match", "Scored against active capacity automatically."],
+              ["03", "Connect", "Message, book and review — in the app."],
+            ].map(([n, title, desc]) => (
               <div
-                key={title}
-                className="relative rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6"
+                key={n}
+                className="rounded-2xl border border-white/10 bg-white/5 p-5"
               >
-                {/* Connector arrow between steps (desktop only) */}
-                {i < STEPS.length - 1 && (
-                  <ArrowRight
-                    aria-hidden="true"
-                    className="absolute top-1/2 -right-[1.65rem] hidden h-5 w-5 -translate-y-1/2 text-green-500/50 md:block"
-                  />
-                )}
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-600 text-sm font-extrabold text-white">
-                  {i + 1}
+                <span className="text-2xl font-extrabold text-green-500/70">
+                  {n}
                 </span>
-                <span className="mt-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-green-400">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <h3 className="mt-3 font-bold text-white">{title}</h3>
+                <h3 className="mt-2 font-bold text-white">{title}</h3>
                 <p className="mt-1 text-sm text-slate-400">{desc}</p>
               </div>
             ))}
           </div>
+
+          <Link
+            to="/how-it-works"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/25 px-5 py-3 text-sm font-bold text-white transition-colors hover:border-green-500 hover:text-green-400 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+          >
+            Explore how it works
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
