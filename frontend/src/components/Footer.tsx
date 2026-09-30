@@ -10,7 +10,7 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
     links: [
       { label: "Find capacity", to: "/register" },
       { label: "List resources", to: "/register" },
-      { label: "How it works", to: "/#how" },
+      { label: "How it works", to: "/how-it-works" },
       { label: "Categories", to: "/#categories" },
     ],
   },
