@@ -7,7 +7,6 @@
  * from auth.ts instead of being duplicated.
  */
 
-import type { ApiErrorData } from "../types/auth";
 import type {
   Availability,
   AvailabilityPayload,
@@ -15,31 +14,7 @@ import type {
   ResourceFilters,
   ResourcePayload,
 } from "../types/resources";
-import { API_BASE_URL, ApiError, getAccessToken } from "./auth";
-
-async function authedRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const access = getAccessToken();
-  if (!access) throw new Error("No access token. Please log in.");
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${access}`,
-      ...(options.headers as Record<string, string> | undefined),
-    },
-  });
-  if (res.status === 204) return undefined as T;
-  let data: T | ApiErrorData | null = null;
-  try {
-    data = (await res.json()) as T | ApiErrorData;
-  } catch {
-    data = null;
-  }
-  if (!res.ok) {
-    throw new ApiError(res.status, (data as ApiErrorData) ?? null, `HTTP ${res.status}`);
-  }
-  return data as T;
-}
+import { authedRequest } from "./client";
 
 function filterQuery(filters: ResourceFilters): string {
   const params = new URLSearchParams();
