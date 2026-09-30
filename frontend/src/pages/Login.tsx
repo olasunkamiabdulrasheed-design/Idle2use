@@ -19,7 +19,7 @@ const inputClass =
   "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100";
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user, login, sessionMessage, clearSessionMessage } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -34,6 +34,7 @@ export default function Login() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    clearSessionMessage();
     setBusy(true);
     try {
       await login({ username: username.trim(), password });
@@ -99,6 +100,14 @@ export default function Login() {
               Access your Idle2Use dashboard.
             </p>
 
+            {sessionMessage && (
+              <p
+                role="status"
+                className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800"
+              >
+                {sessionMessage}
+              </p>
+            )}
             {error && (
               <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                 {error}
