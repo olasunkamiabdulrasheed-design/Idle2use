@@ -14,7 +14,8 @@ import {
   Search,
   Target,
 } from "lucide-react";
-import { formatApiError } from "../api/auth";
+import { Link } from "react-router-dom";
+import { friendlyError } from "../api/auth";
 import { listBookings, createBooking } from "../api/bookings";
 import { getDashboard } from "../api/dashboard";
 import { listNotifications } from "../api/notifications";
@@ -59,8 +60,10 @@ function StatCard({
 
 export default function DashboardPanel({
   onRequestCreated,
+  username,
 }: {
   onRequestCreated?: () => void;
+  username?: string;
 }) {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -72,6 +75,7 @@ export default function DashboardPanel({
   const [nlText, setNlText] = useState("");
   const [parsing, setParsing] = useState(false);
   const [notice, setNotice] = useState("");
+  const [aiParsed, setAiParsed] = useState<boolean | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [bookingMatch, setBookingMatch] = useState<number | null>(null);
 
@@ -88,7 +92,7 @@ export default function DashboardPanel({
       setBookings(b.filter((x) => x.status !== "cancelled").slice(0, 4));
       setError("");
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }
@@ -98,7 +102,7 @@ export default function DashboardPanel({
     refresh();
   }, [refresh]);
 
-  /** NL → parse (AI) → create request → run matching → show results. */
+  /** NL → parse → create request → run matching → show results. */
   async function handleFindMatches(e: React.FormEvent) {
     e.preventDefault();
     if (!nlText.trim() || parsing) return;
@@ -107,6 +111,9 @@ export default function DashboardPanel({
     setNotice("");
     try {
       const parsed = await parseRequestText(nlText.trim());
+      // The backend reports which engine produced the suggestion ("ai" when
+      // an AI key is configured, deterministic "fallback" otherwise).
+      setAiParsed(parsed.parser === "ai");
       const s = parsed.suggestion;
       const created = await createRequest({
         category: s.category ?? "space",
@@ -131,7 +138,7 @@ export default function DashboardPanel({
       refresh();
       onRequestCreated?.();
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setParsing(false);
     }
@@ -151,7 +158,7 @@ export default function DashboardPanel({
       setMatches((prev) => prev.filter((x) => x.id !== m.id));
       refresh();
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setBookingMatch(null);
     }
@@ -166,39 +173,39 @@ export default function DashboardPanel({
       <div className="space-y-6">
         {/* Greeting */}
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">
+          <h1 className="text-2xl font-extrabold break-words text-slate-900">
             {greeting}
+            {username ? `, ${username}` : ""}
           </h1>
           <p className="text-sm text-slate-500">
-            Here's what's happening with your capacity requests.
+            Here's what's happening with your capacity.
           </p>
         </div>
 
-        {/* Stat cards */}
-        {stats && (
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <StatCard icon={<ClipboardList className="h-5 w-5" />} label="Active Requests" value={stats.active_requests} />
-            <StatCard icon={<Target className="h-5 w-5" />} label="Matches Found" value={stats.new_matches} />
-            <StatCard icon={<CalendarClock className="h-5 w-5" />} label="Upcoming Bookings" value={stats.upcoming_bookings} />
-            <StatCard icon={<MessagesSquare className="h-5 w-5" />} label="Total Messages" value={stats.conversations} />
-          </div>
-        )}
+        {/* Stat cards — real API data, 0 when there is none yet */}
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard icon={<ClipboardList className="h-5 w-5" />} label="Requests" value={stats?.active_requests ?? 0} />
+          <StatCard icon={<Target className="h-5 w-5" />} label="Matches" value={stats?.new_matches ?? 0} />
+          <StatCard icon={<CalendarClock className="h-5 w-5" />} label="Bookings" value={stats?.upcoming_bookings ?? 0} />
+          <StatCard icon={<MessagesSquare className="h-5 w-5" />} label="Messages" value={stats?.conversations ?? 0} />
+        </div>
 
-        {/* AI request composer */}
+        {/* Request composer */}
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base font-bold text-slate-900">
                   Describe what you need
                 </h2>
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 uppercase">
-                  AI Powered
-                </span>
+                {aiParsed && (
+                  <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 uppercase">
+                    AI Powered
+                  </span>
+                )}
               </div>
               <p className="mt-0.5 text-xs text-slate-500">
-                Use natural language — our AI structures your request and finds
-                the best matches.
+                Tell us what you're looking for in plain English.
               </p>
             </div>
           </div>
@@ -233,7 +240,7 @@ export default function DashboardPanel({
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-800 disabled:opacity-50"
             >
               <Search className="h-4 w-4" />
-              {parsing ? "Parsing with AI…" : "Find Matches"}
+              {parsing ? "Finding matches…" : "Find Matches"}
             </button>
           </form>
 
@@ -262,9 +269,17 @@ export default function DashboardPanel({
             </div>
           )}
           {!loading && matches.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
-              No matches yet — describe what you need above and our AI will
-              search available capacity.
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center">
+              <p className="text-sm font-bold text-slate-700">No matches yet</p>
+              <p className="mx-auto mt-1 max-w-xs text-sm text-slate-500">
+                Describe what you need and we'll show relevant capacity here.
+              </p>
+              <Link
+                to="/app/find"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"
+              >
+                <Search className="h-4 w-4" /> Find Capacity
+              </Link>
             </div>
           )}
           <div className="space-y-3">
