@@ -10,7 +10,7 @@ import {
   updateAvailability,
   updateResource,
 } from "../api/resources";
-import { formatApiError } from "../api/auth";
+import { friendlyError } from "../api/auth";
 import type {
   Availability,
   Resource,
@@ -62,7 +62,7 @@ export default function ResourcesPanel() {
       });
       setResources(data);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }
@@ -118,7 +118,7 @@ export default function ResourcesPanel() {
       cancelEdit();
       await load({ category: filterCategory, location: filterLocation, status: filterStatus });
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setBusy(false);
     }
@@ -128,10 +128,10 @@ export default function ResourcesPanel() {
     setError("");
     try {
       await deleteResource(id);
-      setNotice(`Deleted resource #${id}. DELETE means it no longer exists.`);
+      setNotice("Resource deleted.");
       setResources((prev) => prev.filter((r) => r.id !== id));
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -147,7 +147,7 @@ export default function ResourcesPanel() {
       );
       setResources((prev) => prev.map((x) => (x.id === r.id ? { ...x, status: next } : x)));
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -158,7 +158,7 @@ export default function ResourcesPanel() {
       setSlots((prev) => ({ ...prev, [resourceId]: data }));
       setOpenId(resourceId);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -184,7 +184,7 @@ export default function ResourcesPanel() {
       }
       await loadSlots(resourceId);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -195,19 +195,19 @@ export default function ResourcesPanel() {
       setNotice(`Availability #${slotId} deleted.`);
       await loadSlots(resourceId);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
   return (
     <section className="rounded-2xl bg-white p-8 shadow">
       <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">
-        Stage 3 · My Resources
+        My Resources
       </p>
       <h2 className="mt-1 text-2xl font-bold text-slate-900">I HAVE CAPACITY</h2>
       {notice && <p className="mt-2 text-sm text-green-700">{notice}</p>}
       {error && (
-        <p className="mt-2 rounded-lg bg-red-50 p-3 font-mono text-sm break-all text-red-700">
+        <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -221,14 +221,14 @@ export default function ResourcesPanel() {
           <option value="space">Space</option>
           <option value="equipment">Equipment</option>
         </select>
-        <input value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} placeholder="location contains…" className={inputClass} />
+        <input value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} placeholder="Filter by location…" aria-label="Filter by location" className={inputClass} />
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={inputClass}>
           <option value="">Any status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
         <button type="submit" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-          GET /api/resources/
+          Apply Filters
         </button>
       </form>
 
@@ -240,14 +240,14 @@ export default function ResourcesPanel() {
           <option value="space">Space</option>
           <option value="equipment">Equipment</option>
         </select>
-        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="name *" required className={inputClass} />
-        <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="location * (e.g. Ikeja, Lagos)" required className={inputClass} />
-        <input value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="capacity *" type="number" min={1} required className={inputClass} />
-        <input value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} placeholder="capacity_unit (people, boxes…)" className={inputClass} />
-        <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="description" className={`${inputClass} md:col-span-2`} />
+        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Resource name *" aria-label="Resource name" required className={inputClass} />
+        <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Location * (e.g. Ikeja, Lagos)" aria-label="Location" required className={inputClass} />
+        <input value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="Capacity *" aria-label="Capacity" type="number" min={1} required className={inputClass} />
+        <input value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} placeholder="Capacity unit (e.g. people, boxes)" aria-label="Capacity unit" className={inputClass} />
+        <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" aria-label="Description" className={`${inputClass} md:col-span-2`} />
         <div className="flex gap-2 md:col-span-2">
           <button type="submit" disabled={busy} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-            {busy ? "Saving…" : editingId === null ? "POST /api/resources/" : `PATCH /api/resources/${editingId}/`}
+            {busy ? "Publishing…" : editingId === null ? "Publish Resource" : "Save Changes"}
           </button>
           {editingId !== null && (
             <button type="button" onClick={cancelEdit} className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900">
@@ -291,7 +291,7 @@ export default function ResourcesPanel() {
                 <p className="text-xs font-bold text-slate-700 uppercase">Availability</p>
                 <ul className="mt-1 space-y-1">
                   {(slots[r.id] ?? []).map((s) => (
-                    <li key={s.id} className="flex flex-wrap items-center gap-2 font-mono text-xs text-slate-800">
+                      <li key={s.id} className="flex flex-wrap items-center gap-2 text-xs text-slate-800">
                       <span>#{s.id} {s.date} {s.start_time}–{s.end_time} [{s.status}]</span>
                       <button
                         type="button"
