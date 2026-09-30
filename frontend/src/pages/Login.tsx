@@ -75,7 +75,7 @@ export default function Login() {
           </ul>
         </div>
         <p className="text-xs text-slate-500">
-          JWT sessions · refresh rotation · blacklisted logout
+          Secure sign-in · Messages, bookings and matches in one place
         </p>
       </div>
 

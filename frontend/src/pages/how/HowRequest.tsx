@@ -90,8 +90,8 @@ export default function HowRequest() {
               10am–4pm.”
             </p>
             <p className="mt-3 text-xs text-slate-400">
-              Sent to <code className="text-green-400">POST /api/requests/parse/</code> —
-              the suggestion is never persisted until you confirm it.
+              Sent to the request parser — the suggestion is never stored
+              until you confirm it.
             </p>
           </div>
 
