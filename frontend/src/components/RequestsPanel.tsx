@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { formatApiError } from "../api/auth";
+import { friendlyError } from "../api/auth";
 import { createBooking } from "../api/bookings";
 import {
   createRequest,
@@ -76,7 +76,7 @@ export default function RequestsPanel() {
         [m.request]: (prev[m.request] ?? []).filter((x) => x.id !== m.id),
       }));
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setBookingMatch(null);
     }
@@ -94,7 +94,7 @@ export default function RequestsPanel() {
           : "No strong matches right now. Your request stays active — we'll check again when new capacity appears.",
       );
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setMatchingId(null);
     }
@@ -107,7 +107,7 @@ export default function RequestsPanel() {
       const data = await listRequests(status ? { status } : {});
       setRequests(data);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setLoading(false);
     }
@@ -144,7 +144,7 @@ export default function RequestsPanel() {
       setParserSource(res.parser === "ai" ? "AI" : "rule-based");
       setUnderstood(true);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setParsing(false);
     }
@@ -175,7 +175,7 @@ export default function RequestsPanel() {
       await load(filterStatus);
       await handleFindMatches(created.id);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     } finally {
       setBusy(false);
     }
@@ -188,7 +188,7 @@ export default function RequestsPanel() {
       setRequests((prev) => prev.map((x) => (x.id === r.id ? updated : x)));
       setNotice(`Request #${r.id} cancelled.`);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
@@ -199,14 +199,14 @@ export default function RequestsPanel() {
       setRequests((prev) => prev.filter((x) => x.id !== r.id));
       setNotice(`Request #${r.id} deleted.`);
     } catch (err: unknown) {
-      setError(formatApiError(err));
+      setError(friendlyError(err));
     }
   }
 
   return (
     <section className="rounded-2xl bg-white p-8 shadow">
       <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">
-        Stage 4 · Capacity Requests
+        Find Capacity
       </p>
       <h2 className="mt-1 text-2xl font-bold text-slate-900">I NEED CAPACITY</h2>
       <p className="mt-1 text-sm text-slate-600">
@@ -214,7 +214,7 @@ export default function RequestsPanel() {
       </p>
       {notice && <p className="mt-2 text-sm text-green-700">{notice}</p>}
       {error && (
-        <p className="mt-2 rounded-lg bg-red-50 p-3 font-mono text-sm break-all text-red-700">
+        <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -268,14 +268,14 @@ export default function RequestsPanel() {
           aria-label="Resource type"
           value={form.resource_type}
           onChange={(e) => setForm({ ...form, resource_type: e.target.value })}
-          placeholder="resource type (classroom, hall…)"
+          placeholder="Resource type (classroom, hall…)"
           className={inputClass}
         />
         <input
           aria-label="Location"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          placeholder="location * (Ikeja, Lagos)"
+          placeholder="Location * (Ikeja, Lagos)"
           required
           className={inputClass}
         />
@@ -283,7 +283,7 @@ export default function RequestsPanel() {
           aria-label="Capacity required"
           value={form.capacity_required}
           onChange={(e) => setForm({ ...form, capacity_required: e.target.value })}
-          placeholder="capacity required *"
+          placeholder="Capacity required *"
           type="number"
           min={1}
           required
@@ -319,14 +319,14 @@ export default function RequestsPanel() {
           aria-label="Purpose"
           value={form.purpose}
           onChange={(e) => setForm({ ...form, purpose: e.target.value })}
-          placeholder="purpose (birthday event, meeting…)"
+          placeholder="Purpose (birthday event, meeting…)"
           className={`${inputClass} md:col-span-2`}
         />
         <input
           aria-label="Requirements"
           value={form.requirements}
           onChange={(e) => setForm({ ...form, requirements: e.target.value })}
-          placeholder="requirements (must have projector…)"
+          placeholder="Requirements (must have projector…)"
           className={`${inputClass} md:col-span-2`}
         />
         <textarea
@@ -343,7 +343,7 @@ export default function RequestsPanel() {
             disabled={busy}
             className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {busy ? "Creating…" : "POST /api/requests/"}
+            {busy ? "Creating…" : "Find Matching Capacity"}
           </button>
         </div>
       </form>
@@ -397,7 +397,7 @@ export default function RequestsPanel() {
               <p className="text-xs text-slate-500">Requirements: {r.requirements}</p>
             )}
             {r.original_text && (
-              <p className="mt-1 font-mono text-xs break-all text-slate-500 italic">
+              <p className="mt-1 text-xs text-slate-500 italic">
                 “{r.original_text}”
               </p>
             )}
