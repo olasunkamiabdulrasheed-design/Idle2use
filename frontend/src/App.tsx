@@ -6,6 +6,12 @@ import Register from "./pages/Register";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import HowItWorksLayout from "./pages/how/HowItWorksLayout";
+import HowOverview from "./pages/how/HowOverview";
+import HowRequest from "./pages/how/HowRequest";
+import HowProvider from "./pages/how/HowProvider";
+import HowMatching from "./pages/how/HowMatching";
+import HowTrust from "./pages/how/HowTrust";
 import AppShell, {
   BookingsPage,
   DashboardPage,
@@ -26,6 +32,13 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/how-it-works" element={<HowItWorksLayout />}>
+        <Route index element={<HowOverview />} />
+        <Route path="request" element={<HowRequest />} />
+        <Route path="provider" element={<HowProvider />} />
+        <Route path="matching" element={<HowMatching />} />
+        <Route path="trust" element={<HowTrust />} />
+      </Route>
       <Route
         path="/app"
         element={
