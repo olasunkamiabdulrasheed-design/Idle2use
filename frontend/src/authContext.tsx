@@ -6,14 +6,19 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
+  clearTokens,
   fetchHealth,
   fetchMe,
   formatApiError,
   getAccessToken,
+  isTokenInvalidError,
   loginUser,
   logoutUser,
+  onRefreshActivity,
+  onSessionExpired,
   refreshAccessToken,
   registerUser,
+  SESSION_EXPIRED_MESSAGE,
 } from "./api/auth";
 import type {
   AuthUser,
@@ -30,6 +35,11 @@ type HealthState =
 interface AuthContextValue {
   user: AuthUser | null;
   restoring: boolean;
+  /** True while a single-flight token refresh is in flight. */
+  refreshing: boolean;
+  /** Set when the session died (expired refresh); Login displays it. */
+  sessionMessage: string;
+  clearSessionMessage: () => void;
   health: HealthState;
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<string>;
@@ -41,7 +51,23 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [restoring, setRestoring] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [sessionMessage, setSessionMessage] = useState("");
   const [health, setHealth] = useState<HealthState>({ state: "loading" });
+
+  // Session died somewhere in the app (refresh failed): drop the user so
+  // protected routes redirect to /login, and surface a friendly message.
+  useEffect(() => {
+    const offExpired = onSessionExpired(() => {
+      setUser(null);
+      setSessionMessage(SESSION_EXPIRED_MESSAGE);
+    });
+    const offActivity = onRefreshActivity(setRefreshing);
+    return () => {
+      offExpired();
+      offActivity();
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,8 +91,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await refreshAccessToken();
             const me = await fetchMe();
             if (!cancelled) setUser(me);
-          } catch {
-            /* refresh expired — stay logged out */
+          } catch (err: unknown) {
+            // Only nuke stored tokens when the credential itself is dead;
+            // a network blip must not log the user out.
+            if (isTokenInvalidError(err)) {
+              clearTokens();
+              if (!cancelled) setSessionMessage(SESSION_EXPIRED_MESSAGE);
+            }
           }
         } finally {
           if (!cancelled) setRestoring(false);
@@ -83,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (payload: LoginPayload) => {
     const res = await loginUser(payload);
+    setSessionMessage("");
     setUser(res.user);
   }, []);
 
@@ -93,12 +125,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await logoutUser();
+    setSessionMessage("");
     setUser(null);
   }, []);
 
+  const clearSessionMessage = useCallback(() => setSessionMessage(""), []);
+
   return (
     <AuthContext.Provider
-      value={{ user, restoring, health, login, register, logout }}
+      value={{
+        user,
+        restoring,
+        refreshing,
+        sessionMessage,
+        clearSessionMessage,
+        health,
+        login,
+        register,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
