@@ -41,26 +41,26 @@ export default function HowMatching() {
   usePageTitle("Matching");
 
   return (
-    <div className="pb-4">
+    <div>
       <HowHero
         title="How matching works"
         subtitle="Idle2Use compares request requirements against available capacity. It is deterministic scoring with hard gates — no guessing."
       />
 
       {/* Chain */}
-      <section className="mt-8">
+      <section className="mt-10">
         <div className="flex flex-col items-center gap-2">
           {CHAIN.map((label, i) => (
             <div key={label} className="contents">
-              <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 text-center">
-                <p className="text-sm font-bold text-white">
+              <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-850 px-4 py-3.5 text-center">
+                <p className="text-sm font-bold text-mist-100">
                   {i + 1}. {label}
                 </p>
               </div>
               {i < CHAIN.length - 1 && (
                 <ArrowDown
                   aria-hidden="true"
-                  className="h-5 w-5 text-green-500/60"
+                  className="h-5 w-5 text-brand-500/50"
                 />
               )}
             </div>
@@ -69,21 +69,22 @@ export default function HowMatching() {
       </section>
 
       {/* Explanation + hard gates */}
-      <section className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
-          <h2 className="text-lg font-extrabold text-white">
+      <section className="mt-16 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-ink-800 p-6">
+          <h2 className="text-lg font-extrabold text-mist-100">
             First: the hard gates
           </h2>
-          <p className="mt-2 text-sm text-slate-400">
-            A candidate resource must pass every gate to become a match at all.
-            Failing any gate means it is skipped — it never gets a score.
+          <p className="mt-3 text-sm leading-relaxed text-mist-400">
+            A candidate resource has to clear every one of these before it counts
+            as a match at all. Fail a single gate and it is skipped outright — it
+            never even reaches the scoring stage.
           </p>
-          <ul className="mt-4 space-y-2.5">
+          <ul className="mt-5 space-y-3">
             {GATES.map((g) => (
-              <li key={g} className="flex items-start gap-2 text-sm text-slate-300">
+              <li key={g} className="flex items-start gap-2.5 text-sm text-mist-200">
                 <Zap
                   aria-hidden="true"
-                  className="mt-0.5 h-4 w-4 shrink-0 text-green-400"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-brand-400"
                 />
                 {g}
               </li>
@@ -91,31 +92,33 @@ export default function HowMatching() {
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
-          <h2 className="text-lg font-extrabold text-white">
+        <div className="rounded-2xl border border-white/10 bg-ink-800 p-6">
+          <h2 className="text-lg font-extrabold text-mist-100">
             Then: weighted scoring
           </h2>
-          <p className="mt-2 text-sm text-slate-400">
-            Surviving candidates get a score out of 100 built from five factors:
+          <p className="mt-3 text-sm leading-relaxed text-mist-400">
+            Whatever survives the gates is then scored out of 100, built from
+            five weighted factors. The weights below are the real ones — they
+            decide the order you see matches in.
           </p>
-          <ul className="mt-4 space-y-4">
+          <ul className="mt-5 space-y-5">
             {WEIGHTS.map(({ label, pct, note }) => (
               <li key={label}>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-bold text-white">{label}</span>
-                  <span className="font-extrabold text-green-400">{pct}%</span>
+                  <span className="font-bold text-mist-100">{label}</span>
+                  <span className="font-extrabold text-brand-400">{pct}%</span>
                 </div>
                 <div
-                  className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/10"
+                  className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"
                   role="img"
                   aria-label={`${label} weight: ${pct} percent`}
                 >
                   <div
-                    className="h-full rounded-full bg-green-500"
+                    className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-slate-400">{note}</p>
+                <p className="mt-1.5 text-xs text-mist-500">{note}</p>
               </li>
             ))}
           </ul>
@@ -123,41 +126,52 @@ export default function HowMatching() {
       </section>
 
       {/* When it runs + reasons */}
-      <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-green-500/20 bg-green-500/5 p-5 sm:p-6">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600/20 text-green-400">
+      <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-brand-500/20 bg-brand-500/[0.06] p-6">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/15 text-brand-400">
             <Bell className="h-5 w-5" />
           </span>
-          <h2 className="mt-3 text-lg font-extrabold text-white">
+          <h2 className="mt-4 text-lg font-extrabold text-mist-100">
             When matching runs
           </h2>
-          <ul className="mt-3 space-y-2 text-sm text-slate-300">
+          <p className="mt-3 text-sm leading-relaxed text-mist-400">
+            Matching is not a nightly job you have to wait for. It re-runs
+            whenever something changes on either side:
+          </p>
+          <ul className="mt-4 space-y-3 text-sm leading-relaxed text-mist-300">
             <li>
-              <strong className="text-white">When you post a request</strong> —
-              active resources of the right category are scored immediately.
+              <strong className="text-mist-100">When you post a request</strong> —
+              every active resource in the right category is scored straight
+              away, so your matches are waiting the moment you look.
             </li>
             <li>
-              <strong className="text-white">When a provider changes capacity</strong> —
-              saving a resource or availability re-checks all active requests
-              (synchronous — no background queue in this MVP).
+              <strong className="text-mist-100">
+                When a provider changes capacity
+              </strong>{" "}
+              — saving a resource or its availability re-checks all active
+              requests, so a newly freed slot finds its match immediately
+              (synchronous — there is no background queue in this MVP).
             </li>
             <li>
-              <strong className="text-white">Notifications</strong> — the
-              requester is notified about brand-new matches only.
+              <strong className="text-mist-100">Notifications</strong> — the
+              requester is told about brand-new matches only, so nobody gets
+              pinged twice for the same thing.
             </li>
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
-          <h2 className="text-lg font-extrabold text-white">
+        <div className="rounded-2xl border border-white/10 bg-ink-800 p-6">
+          <h2 className="text-lg font-extrabold text-mist-100">
             Every match explains itself
           </h2>
-          <p className="mt-2 text-sm text-slate-400">
-            Scores are for ranking; the reasons are the source of truth about{" "}
-            <em className="text-slate-300 not-italic">why</em> something matched.
-            Examples straight from the engine:
+          <p className="mt-3 text-sm leading-relaxed text-mist-400">
+            The score is there to rank your options. The reasons are what tell
+            you{" "}
+            <em className="text-mist-200 not-italic">why</em> something matched
+            — they are generated by the engine itself, not written by hand.
+            These are real examples:
           </p>
-          <ul className="mt-4 flex flex-wrap gap-2">
+          <ul className="mt-5 flex flex-wrap gap-2">
             {[
               "Location matches exactly",
               "Available Oct 06 10:00-16:00",
@@ -167,21 +181,23 @@ export default function HowMatching() {
             ].map((r) => (
               <li
                 key={r}
-                className="rounded-lg border border-green-500/30 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-300"
+                className="rounded-lg border border-brand-500/30 bg-brand-500/10 px-2.5 py-1 text-xs font-semibold text-brand-300"
               >
                 {r}
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-xs text-slate-400">
-            Note: AI is used to parse plain-English requests into structure —
-            matching itself is deterministic scoring.
+          <p className="mt-5 text-xs leading-relaxed text-mist-500">
+            One thing worth being clear about: AI is only used to turn a
+            plain-English request into structured fields. The matching itself is
+            deterministic scoring — the same inputs always produce the same
+            ranked list.
           </p>
         </div>
       </section>
 
       {/* Related */}
-      <section className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <section className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <NavCard
           to="/how-it-works/request"
           Icon={ArrowDown}
@@ -198,6 +214,7 @@ export default function HowMatching() {
 
       <CtaBand
         text="See matching in action"
+        subtext="Post a request in your own words and watch it come back as a ranked list of resources — each one with the reasons it was chosen."
         to="/register"
         label="Get Started"
       />

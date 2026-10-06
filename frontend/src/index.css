@@ -1,1 +1,127 @@
 @import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Idle2Use design tokens.
+
+   One dark palette and one accent for the entire product — marketing pages and
+   the signed-in app alike. Screens compose these tokens instead of hard-coding
+   hex values, so the theme can move in one place.
+   --------------------------------------------------------------------------- */
+
+@theme {
+  /* Surfaces — deepest (page) to lightest (raised) */
+  --color-ink-950: #050a14; /* app background, footer */
+  --color-ink-900: #0a1428; /* page background (brand navy) */
+  --color-ink-850: #0d1a31; /* sunken panels, inputs */
+  --color-ink-800: #112039; /* raised panels */
+  --color-ink-700: #182b48; /* hover / borders on raised surfaces */
+  --color-ink-600: #22405f; /* strong borders, dividers */
+
+  /* Text on ink */
+  --color-mist-100: #eef3f9; /* headings */
+  --color-mist-200: #d8e1ee; /* body */
+  --color-mist-300: #b3c1d6; /* secondary body */
+  --color-mist-400: #8595ad; /* muted labels */
+  --color-mist-500: #64748b; /* faintest text */
+
+  /* Brand — the green identity, unchanged */
+  --color-brand-300: #86efac;
+  --color-brand-400: #4ade80;
+  --color-brand-500: #22c55e;
+  --color-brand-600: #16a34a;
+  --color-brand-700: #15803d;
+
+  /* Status accents */
+  --color-warn-300: #fcd34d;
+  --color-warn-400: #fbbf24;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ink-900);
+    color: var(--color-mist-200);
+    font-family:
+      "Inter",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Headings are tighter and heavier than default on dark surfaces. */
+  h1,
+  h2,
+  h3 {
+    color: var(--color-mist-100);
+    letter-spacing: -0.02em;
+  }
+
+  /* A single visible focus treatment for the whole product. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+  }
+
+  /* Native controls should follow the dark theme. */
+  input,
+  textarea,
+  select {
+    color-scheme: dark;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-brand-500) 35%, transparent);
+  }
+}
+
+/* Honour reduced-motion for every transition and scroll animation. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@utility container-page {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-inline: 1rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+}
+
+@utility container-wide {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 96rem;
+  padding-inline: 1rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 3rem;
+  }
+}

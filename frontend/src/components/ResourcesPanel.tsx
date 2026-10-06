@@ -1,5 +1,9 @@
+/** My Resources — publish capacity, manage availability windows, and browse
+ * what you have listed. */
+
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { Boxes, CalendarPlus, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   createAvailability,
   createResource,
@@ -17,9 +21,11 @@ import type {
   ResourceCategory,
   ResourceStatus,
 } from "../types/resources";
-
-const inputClass =
-  "rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none";
+import Alert from "./ui/Alert";
+import Badge, { statusTone } from "./ui/Badge";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import { Field, Input, Select } from "./ui/Field";
 
 const emptyForm = {
   category: "space" as ResourceCategory,
@@ -29,6 +35,13 @@ const emptyForm = {
   capacity: "40",
   capacity_unit: "people",
 };
+
+const CATEGORY_OPTIONS = [
+  ["space", "Space"],
+  ["storage", "Storage"],
+  ["transportation", "Transportation"],
+  ["equipment", "Equipment"],
+] as const;
 
 export default function ResourcesPanel() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -200,99 +213,215 @@ export default function ResourcesPanel() {
   }
 
   return (
-    <section className="rounded-2xl bg-white p-8 shadow">
-      <p className="text-sm font-medium tracking-wide text-slate-500 uppercase">
-        My Resources
-      </p>
-      <h2 className="mt-1 text-2xl font-bold text-slate-900">I HAVE CAPACITY</h2>
-      {notice && <p className="mt-2 text-sm text-green-700">{notice}</p>}
-      {error && (
-        <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </p>
-      )}
+    <div className="space-y-5">
+      {notice && <Alert tone="success">{notice}</Alert>}
+      {error && <Alert tone="danger">{error}</Alert>}
 
-      {/* Filters (basic browsing; matching engine comes later). */}
-      <form onSubmit={applyFilters} className="mt-4 flex flex-wrap gap-2">
-        <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className={inputClass}>
-          <option value="">All categories</option>
-          <option value="transportation">Transportation</option>
-          <option value="storage">Storage</option>
-          <option value="space">Space</option>
-          <option value="equipment">Equipment</option>
-        </select>
-        <input value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} placeholder="Filter by location…" aria-label="Filter by location" className={inputClass} />
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={inputClass}>
-          <option value="">Any status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-        <button type="submit" className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
-          Apply Filters
-        </button>
-      </form>
-
-      {/* Create / edit form. */}
-      <form onSubmit={handleSubmit} className="mt-4 grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2">
-        <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as ResourceCategory })} className={inputClass}>
-          <option value="transportation">Transportation</option>
-          <option value="storage">Storage</option>
-          <option value="space">Space</option>
-          <option value="equipment">Equipment</option>
-        </select>
-        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Resource name *" aria-label="Resource name" required className={inputClass} />
-        <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Location * (e.g. Ikeja, Lagos)" aria-label="Location" required className={inputClass} />
-        <input value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder="Capacity *" aria-label="Capacity" type="number" min={1} required className={inputClass} />
-        <input value={form.capacity_unit} onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })} placeholder="Capacity unit (e.g. people, boxes)" aria-label="Capacity unit" className={inputClass} />
-        <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Description" aria-label="Description" className={`${inputClass} md:col-span-2`} />
-        <div className="flex gap-2 md:col-span-2">
-          <button type="submit" disabled={busy} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-            {busy ? "Publishing…" : editingId === null ? "Publish Resource" : "Save Changes"}
-          </button>
-          {editingId !== null && (
-            <button type="button" onClick={cancelEdit} className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900">
-              Cancel
-            </button>
+      {/* Publish / edit */}
+      <Card>
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-base font-bold text-mist-100">
+            {editingId === null ? "Publish a resource" : `Edit resource #${editingId}`}
+          </h2>
+          {editingId === null && (
+            <Badge tone="brand">
+              <Plus className="h-3 w-3" /> New listing
+            </Badge>
           )}
         </div>
-      </form>
+        <p className="mt-1 text-sm text-mist-400">
+          List what you have and matching will surface it to the right requests.
+        </p>
 
-      {/* Resource list. */}
-      <div className="mt-4 space-y-3">
-        {loading && <p className="text-sm text-slate-600">Loading resources…</p>}
+        <form onSubmit={handleSubmit} className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field label="Category">
+            <Select
+              value={form.category}
+              onChange={(e) =>
+                setForm({ ...form, category: e.target.value as ResourceCategory })
+              }
+            >
+              {CATEGORY_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+
+          <Field label="Resource name">
+            <Input
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Community hall, 10ft van…"
+              required
+            />
+          </Field>
+
+          <Field label="Location">
+            <Input
+              value={form.location}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
+              placeholder="Ikeja, Lagos"
+              required
+            />
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Capacity">
+              <Input
+                value={form.capacity}
+                onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                type="number"
+                min={1}
+                required
+              />
+            </Field>
+            <Field label="Unit">
+              <Input
+                value={form.capacity_unit}
+                onChange={(e) => setForm({ ...form, capacity_unit: e.target.value })}
+                placeholder="people"
+              />
+            </Field>
+          </div>
+
+          <Field label="Description" className="sm:col-span-2">
+            <Input
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="What makes this useful? Parking, projector, loading bay…"
+            />
+          </Field>
+
+          <div className="flex flex-wrap gap-2 sm:col-span-2">
+            <Button type="submit" disabled={busy} size="lg">
+              {busy
+                ? "Saving…"
+                : editingId === null
+                  ? "Publish resource"
+                  : "Save changes"}
+            </Button>
+            {editingId !== null && (
+              <Button type="button" variant="secondary" size="lg" onClick={cancelEdit}>
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
+      </Card>
+
+      {/* Filters */}
+      <Card>
+        <form onSubmit={applyFilters} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
+          <Field label="Category">
+            <Select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+            >
+              <option value="">All categories</option>
+              {CATEGORY_OPTIONS.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Location">
+            <Input
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              placeholder="Filter by location…"
+            />
+          </Field>
+          <Field label="Status">
+            <Select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">Any status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </Select>
+          </Field>
+          <Button type="submit" variant="secondary" size="lg">
+            Apply filters
+          </Button>
+        </form>
+      </Card>
+
+      {/* List */}
+      <div className="space-y-3">
+        {loading && <p className="text-sm text-mist-400">Loading resources…</p>}
+
         {!loading && resources.length === 0 && (
-          <p className="text-sm text-slate-600">No resources yet. Create your first one above.</p>
+          <Card tone="outline" className="border-dashed text-center">
+            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-500/12 text-brand-400">
+              <Boxes className="h-5 w-5" />
+            </span>
+            <p className="mt-3 text-sm font-bold text-mist-100">
+              No resources yet
+            </p>
+            <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-mist-400">
+              You have not listed anything yet. Publish your first resource
+              above — give it a category, a location and the hours it is free,
+              and matching will start bringing requests to you.
+            </p>
+          </Card>
         )}
+
         {resources.map((r) => (
-          <div key={r.id} className="rounded-xl border border-slate-200 p-4">
+          <Card key={r.id} padded={false} className="p-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-bold text-slate-900">#{r.id} {r.name}</span>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">{r.category}</span>
-              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${r.status === "active" ? "bg-green-100 text-green-800" : "bg-slate-200 text-slate-600"}`}>
+              <span className="font-bold text-mist-100">
+                #{r.id} {r.name}
+              </span>
+              <Badge tone="muted" className="capitalize">
+                {r.category}
+              </Badge>
+              <Badge tone={statusTone(r.status)} className="capitalize">
                 {r.status}
-              </span>
-              <span className="text-xs text-slate-500">
-                {r.capacity} {r.capacity_unit} · {r.location} · by {r.owner_username}
-              </span>
+              </Badge>
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" onClick={() => startEdit(r)} className="rounded-lg bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-900">Edit</button>
-              <button type="button" onClick={() => void toggleStatus(r)} className="rounded-lg bg-amber-200 px-3 py-1 text-xs font-semibold text-amber-900">
+
+            <p className="mt-2 text-xs text-mist-400">
+              {r.capacity} {r.capacity_unit} · {r.location} · by {r.owner_username}
+            </p>
+            {r.description && (
+              <p className="mt-1.5 text-sm text-mist-300">{r.description}</p>
+            )}
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" variant="secondary" onClick={() => startEdit(r)}>
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => void toggleStatus(r)}>
                 {r.status === "active" ? "Deactivate" : "Activate"}
-              </button>
-              <button type="button" onClick={() => void handleDelete(r.id)} className="rounded-lg bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">Delete</button>
-              <button type="button" onClick={() => void loadSlots(r.id)} className="rounded-lg bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+              </Button>
+              <Button size="sm" onClick={() => void loadSlots(r.id)}>
+                <CalendarPlus className="h-3.5 w-3.5" />
                 {openId === r.id ? "Reload availability" : "Availability"}
-              </button>
+              </Button>
+              <Button size="sm" variant="danger" onClick={() => void handleDelete(r.id)}>
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </Button>
             </div>
 
             {openId === r.id && (
-              <div className="mt-3 rounded-lg bg-slate-50 p-3">
-                <p className="text-xs font-bold text-slate-700 uppercase">Availability</p>
-                <ul className="mt-1 space-y-1">
+              <div className="mt-4 rounded-xl border border-white/10 bg-ink-850 p-4">
+                <p className="text-xs font-bold tracking-wide text-mist-400 uppercase">
+                  Availability windows
+                </p>
+                <ul className="mt-2 space-y-1.5">
                   {(slots[r.id] ?? []).map((s) => (
-                      <li key={s.id} className="flex flex-wrap items-center gap-2 text-xs text-slate-800">
-                      <span>#{s.id} {s.date} {s.start_time}–{s.end_time} [{s.status}]</span>
+                    <li
+                      key={s.id}
+                      className="flex flex-wrap items-center gap-2 text-xs text-mist-200"
+                    >
+                      <span className="font-semibold">
+                        {s.date} · {s.start_time}–{s.end_time}
+                      </span>
+                      <Badge tone={statusTone(s.status)}>{s.status}</Badge>
                       <button
                         type="button"
                         onClick={() => {
@@ -301,41 +430,75 @@ export default function ResourcesPanel() {
                           setSlotStart(s.start_time.slice(0, 5));
                           setSlotEnd(s.end_time.slice(0, 5));
                         }}
-                        className="rounded bg-slate-200 px-2 py-0.5 font-semibold"
+                        className="rounded-lg border border-white/15 px-2 py-0.5 font-semibold text-mist-300 transition-colors hover:bg-white/[0.08]"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => void handleDeleteSlot(r.id, s.id)}
-                        className="rounded bg-red-100 px-2 py-0.5 font-semibold text-red-700"
+                        className="rounded-lg border border-danger-500/30 px-2 py-0.5 font-semibold text-danger-400 transition-colors hover:bg-danger-500/15"
                       >
                         Delete
                       </button>
                     </li>
                   ))}
                   {(slots[r.id] ?? []).length === 0 && (
-                    <li className="text-xs text-slate-500">No availability yet.</li>
+                    <li className="text-xs leading-relaxed text-mist-500">
+                      No availability set. Add a window below, otherwise
+                      matching has no free hours to offer and this resource will
+                      never be suggested.
+                    </li>
                   )}
                 </ul>
-                <form onSubmit={(e) => void handleAddOrUpdateSlot(e, r.id)} className="mt-2 flex flex-wrap gap-2">
-                  <input type="date" value={slotDate} onChange={(e) => setSlotDate(e.target.value)} required className={inputClass} />
-                  <input type="time" value={slotStart} onChange={(e) => setSlotStart(e.target.value)} required className={inputClass} />
-                  <input type="time" value={slotEnd} onChange={(e) => setSlotEnd(e.target.value)} required className={inputClass} />
-                  <button type="submit" className="rounded-lg bg-green-700 px-3 py-2 text-xs font-semibold text-white">
-                    {editingSlotId === null ? "Add slot" : `Save #${editingSlotId}`}
-                  </button>
-                  {editingSlotId !== null && (
-                    <button type="button" onClick={() => setEditingSlotId(null)} className="rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold">
-                      Cancel
-                    </button>
-                  )}
+
+                <form
+                  onSubmit={(e) => void handleAddOrUpdateSlot(e, r.id)}
+                  className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end"
+                >
+                  <Field label="Date">
+                    <Input
+                      type="date"
+                      value={slotDate}
+                      onChange={(e) => setSlotDate(e.target.value)}
+                      required
+                    />
+                  </Field>
+                  <Field label="From">
+                    <Input
+                      type="time"
+                      value={slotStart}
+                      onChange={(e) => setSlotStart(e.target.value)}
+                      required
+                    />
+                  </Field>
+                  <Field label="To">
+                    <Input
+                      type="time"
+                      value={slotEnd}
+                      onChange={(e) => setSlotEnd(e.target.value)}
+                      required
+                    />
+                  </Field>
+                  <Button type="submit">
+                    {editingSlotId === null ? "Add window" : `Save #${editingSlotId}`}
+                  </Button>
                 </form>
+
+                {editingSlotId !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingSlotId(null)}
+                    className="mt-2 text-xs font-bold text-mist-400 transition-colors hover:text-mist-200"
+                  >
+                    Cancel editing window
+                  </button>
+                )}
               </div>
             )}
-          </div>
+          </Card>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

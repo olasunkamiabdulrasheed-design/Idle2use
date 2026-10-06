@@ -12,36 +12,40 @@ export default function NotFound() {
   usePageTitle("Page not found");
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-[#0a1428] text-white">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-ink-900 text-mist-200">
       <Navbar />
 
-      {/* Content */}
-      <main className="flex flex-1 items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-green-600/20 text-green-400">
+      <main className="relative flex flex-1 items-center justify-center px-4 py-20">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/4 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-500/10 blur-[100px]"
+        />
+        <div className="relative w-full max-w-md text-center">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-brand-500/25 bg-brand-500/12 text-brand-400">
             <Compass className="h-8 w-8" />
           </span>
-          <p className="mt-6 text-6xl font-extrabold text-green-500">404</p>
-          <h1 className="mt-2 text-xl font-extrabold sm:text-2xl">
+          <p className="mt-7 text-6xl font-extrabold text-brand-500">404</p>
+          <h1 className="mt-3 text-xl font-extrabold text-mist-100 sm:text-2xl">
             This page doesn't exist
           </h1>
-          <p className="mt-2 text-sm text-slate-400">
-            The link may be broken, or the page may have moved. Let's get you
-            back on track.
+          <p className="mt-3 text-sm leading-relaxed text-mist-400">
+            Nothing lives at this address. The link may be broken, the page may
+            have moved, or it may never have existed at all — either way, there
+            is nothing to see here.
           </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
               to="/"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-bold text-white hover:bg-green-700 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand-600/20 transition-colors hover:bg-brand-500 sm:w-auto"
             >
-              <ArrowLeft className="h-4 w-4" /> Back to Home
+              <ArrowLeft className="h-4 w-4" /> Back to home
             </Link>
             {user && (
               <Link
                 to="/app"
-                className="inline-flex w-full items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-sm font-bold text-white hover:bg-white/10 sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-white/15 px-5 py-3.5 text-sm font-bold text-mist-100 transition-colors hover:bg-white/[0.06] sm:w-auto"
               >
-                Go to Dashboard
+                Go to dashboard
               </Link>
             )}
           </div>

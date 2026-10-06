@@ -1,6 +1,7 @@
-/** Stage 8: conversations list + thread + new conversation. */
+/** Messages — conversations list, thread view, and starting a new chat. */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, MessageSquarePlus, Send } from "lucide-react";
 import { friendlyError } from "../api/auth";
 import {
   createConversation,
@@ -10,6 +11,10 @@ import {
   sendMessage,
 } from "../api/messaging";
 import type { Conversation, Message, UserOption } from "../types/messaging";
+import Alert from "./ui/Alert";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import { Input, Select } from "./ui/Field";
 
 export default function MessagesPanel({ myUsername }: { myUsername: string }) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -89,24 +94,30 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
     }
   }
 
-  return (
-    <section className="rounded-2xl bg-white p-6 shadow">
-      <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
-        Messages
-      </p>
-      <h2 className="text-lg font-bold text-slate-900">Conversations</h2>
-      {error && (
-        <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </p>
-      )}
+  const activeConversation = conversations.find((c) => c.id === activeId);
 
-      <div className="mt-4 grid gap-4 md:grid-cols-[260px_1fr]">
+  return (
+    <div className="space-y-5">
+      {error && <Alert tone="danger">{error}</Alert>}
+
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
         {/* Conversation list — hidden on mobile while a thread is open */}
-        <div className={`space-y-3 ${activeId !== null ? "hidden md:block" : ""}`}>
-          <form onSubmit={handleStart} className="flex gap-2">
-            <select
-              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+        <Card
+          padded={false}
+          className={`p-4 ${activeId !== null ? "hidden lg:block" : ""}`}
+        >
+          <h2 className="flex items-center gap-2 text-sm font-bold text-mist-100">
+            <MessageSquarePlus className="h-4 w-4 text-brand-400" />
+            Conversations
+          </h2>
+
+          <form onSubmit={handleStart} className="mt-3 flex gap-2">
+            <label htmlFor="new-chat" className="sr-only">
+              Start a new chat
+            </label>
+            <Select
+              id="new-chat"
+              className="py-2 text-xs"
               value={newUser}
               onChange={(e) => setNewUser(e.target.value)}
             >
@@ -116,20 +127,22 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
                   {u.username}
                 </option>
               ))}
-            </select>
-            <button
+            </Select>
+            <Button
               type="submit"
+              size="sm"
               disabled={busy || !newUser}
-              className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+              aria-label="Start conversation"
             >
               +
-            </button>
+            </Button>
           </form>
 
-          <ul className="max-h-80 space-y-1 overflow-y-auto">
+          <ul className="mt-3 max-h-80 space-y-1.5 overflow-y-auto lg:max-h-[26rem]">
             {conversations.length === 0 && (
-              <li className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">
-                No conversations yet.
+              <li className="rounded-xl border border-dashed border-white/10 p-4 text-sm leading-relaxed text-mist-500">
+                No conversations yet. Start one with the selector above — you
+                can message anyone you share a booking with.
               </li>
             )}
             {conversations.map((c) => (
@@ -137,14 +150,20 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
                 <button
                   type="button"
                   onClick={() => setActiveId(c.id)}
-                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm ${
+                  className={`w-full rounded-xl border px-3 py-2.5 text-left text-sm transition-colors ${
                     activeId === c.id
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-slate-200 hover:bg-slate-50"
+                      ? "border-brand-500/40 bg-brand-500/15"
+                      : "border-white/10 bg-ink-850 hover:border-white/20 hover:bg-white/[0.05]"
                   }`}
                 >
-                  <span className="block font-semibold">{otherNames(c)}</span>
-                  <span className="block truncate text-xs opacity-75">
+                  <span
+                    className={`block font-semibold ${
+                      activeId === c.id ? "text-brand-300" : "text-mist-100"
+                    }`}
+                  >
+                    {otherNames(c)}
+                  </span>
+                  <span className="mt-0.5 block truncate text-xs text-mist-400">
                     {c.last_message
                       ? `${c.last_message.sender}: ${c.last_message.body}`
                       : "No messages yet"}
@@ -153,62 +172,94 @@ export default function MessagesPanel({ myUsername }: { myUsername: string }) {
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
 
-        <div className="flex h-96 flex-col rounded-xl border border-slate-200 md:h-80">
+        {/* Thread */}
+        <Card padded={false} className="flex h-[32rem] flex-col overflow-hidden">
           {activeId === null ? (
-            <div className="flex flex-1 items-center justify-center p-4 text-sm text-slate-500">
-              Select or start a conversation.
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-500/12 text-brand-400">
+                <MessageSquarePlus className="h-5 w-5" />
+              </span>
+              <p className="text-sm font-bold text-mist-100">
+                No conversation selected
+              </p>
+              <p className="max-w-xs text-sm leading-relaxed text-mist-400">
+                Nothing is open on the right. Choose a conversation from the
+                list, or start a new one with the selector on the left.
+              </p>
             </div>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={() => setActiveId(null)}
-                className="m-2 mb-0 w-fit rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 md:hidden"
-              >
-                ← Back to conversations
-              </button>
-              <div className="mt-2 flex-1 space-y-2 overflow-y-auto p-3">
-                {messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
-                      m.sender_username === myUsername
-                        ? "ml-auto bg-slate-900 text-white"
-                        : "bg-slate-100 text-slate-900"
-                    }`}
-                  >
-                    <span className="block text-[10px] font-semibold opacity-70">
-                      {m.sender_username}
-                    </span>
-                    {m.body}
-                  </div>
-                ))}
+              {/* Thread header */}
+              <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveId(null)}
+                  className="rounded-lg p-1.5 text-mist-300 transition-colors hover:bg-white/[0.08] lg:hidden"
+                  aria-label="Back to conversations"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <span className="min-w-0 truncate text-sm font-bold text-mist-100">
+                  {activeConversation ? otherNames(activeConversation) : "Conversation"}
+                </span>
+              </div>
+
+              <div className="flex-1 space-y-2.5 overflow-y-auto p-4">
+                {messages.length === 0 && (
+                  <p className="px-8 py-8 text-center text-sm leading-relaxed text-mist-500">
+                    No messages yet — say hello to get the conversation started.
+                  </p>
+                )}
+                {messages.map((m) => {
+                  const mine = m.sender_username === myUsername;
+                  return (
+                    <div
+                      key={m.id}
+                      className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                        mine
+                          ? "ml-auto bg-brand-600 text-white"
+                          : "border border-white/10 bg-ink-850 text-mist-100"
+                      }`}
+                    >
+                      <span
+                        className={`block text-[10px] font-bold ${
+                          mine ? "text-white/75" : "text-mist-500"
+                        }`}
+                      >
+                        {m.sender_username}
+                      </span>
+                      <span className="mt-0.5 block break-words">{m.body}</span>
+                    </div>
+                  );
+                })}
                 <div ref={bottomRef} />
               </div>
+
               <form
                 onSubmit={handleSend}
-                className="flex gap-2 border-t border-slate-200 p-2"
+                className="flex gap-2 border-t border-white/10 p-3"
               >
-                <input
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                <label htmlFor="draft" className="sr-only">
+                  Type a message
+                </label>
+                <Input
+                  id="draft"
+                  className="py-2"
                   placeholder="Type a message…"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                 />
-                <button
-                  type="submit"
-                  disabled={!draft.trim()}
-                  className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  Send
-                </button>
+                <Button type="submit" disabled={!draft.trim()} aria-label="Send">
+                  <Send className="h-4 w-4" />
+                  <span className="hidden sm:inline">Send</span>
+                </Button>
               </form>
             </>
           )}
-        </div>
+        </Card>
       </div>
-    </section>
+    </div>
   );
 }

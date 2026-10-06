@@ -1,4 +1,4 @@
-/** Dedicated register page — distinct from login: centered card on navy. */
+/** Dedicated register page — benefits panel + account form. */
 
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -10,15 +10,30 @@ import {
   EyeOff,
   Mail,
   Phone,
-  ShieldCheck,
   User,
 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { formatApiError, useAuth } from "../authContext";
 import { usePageTitle } from "../hooks/usePageTitle";
+import Alert from "../components/ui/Alert";
+import Button from "../components/ui/Button";
+import Logo from "../components/ui/Logo";
+import { Field, Input } from "../components/ui/Field";
 
-const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100";
+const BENEFITS: [string, string][] = [
+  [
+    "Describe what you need in plain English",
+    "Write it the way you would say it out loud. The parser turns your sentence into a structured request — category, location, capacity, date and time — and shows you what it read before anything is saved.",
+  ],
+  [
+    "Get scored matches straight away",
+    "Your request is checked against every resource that is genuinely free, then ranked by five weighted factors: location, time, capacity, resource type and requirements. Each match comes with the reasons it was chosen.",
+  ],
+  [
+    "Book with confidence",
+    "Bookings are clash-checked, so two people cannot claim the same resource at once. Both sides confirm, messages stay attached to the booking, and reviews unlock once it is completed.",
+  ],
+];
 
 export default function Register() {
   const { user, register } = useAuth();
@@ -55,9 +70,7 @@ export default function Register() {
         username: form.username.trim(),
         email: form.email.trim(),
       });
-      setNotice(
-        `Account created for ${username}. Redirecting to sign in…`,
-      );
+      setNotice(`Account created for ${username}. Redirecting to sign in…`);
       setTimeout(() => navigate("/login", { replace: true }), 1200);
     } catch (err: unknown) {
       setError(formatApiError(err));
@@ -66,53 +79,52 @@ export default function Register() {
     }
   }
 
+  const passwordType = showPasswords ? "text" : "password";
+
   return (
-    <div className="min-h-screen bg-[#0a1428]">
+    <div className="min-h-screen bg-ink-900 text-mist-200">
       {/* Compact header */}
-      <header className="border-b border-white/10">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 text-lg font-extrabold text-white">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-              <ShieldCheck className="h-4 w-4" />
-            </span>
-            Idle<span className="text-green-500">2</span>Use
-          </Link>
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-ink-900/80 backdrop-blur-xl">
+        <div className="container-page flex items-center justify-between py-3.5">
+          <Logo />
           <Link
             to="/login"
-            className="rounded-lg border border-white/20 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/10"
+            className="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-mist-100 transition-colors hover:bg-white/[0.06]"
           >
             Sign in
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_460px] lg:py-14">
+      <main className="container-page grid gap-10 py-12 lg:grid-cols-[1fr_460px] lg:py-16">
         {/* Left: benefits */}
-        <div className="text-white">
+        <div>
           <Link
             to="/"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-white"
+            className="mb-7 inline-flex items-center gap-1.5 text-sm font-semibold text-mist-400 transition-colors hover:text-mist-100"
           >
             <ArrowLeft className="h-4 w-4" /> Back to home
           </Link>
-          <h1 className="text-3xl font-extrabold">
+
+          <h1 className="text-3xl leading-tight font-extrabold text-mist-100 sm:text-4xl">
             Create your free account
           </h1>
-          <p className="mt-2 max-w-md text-slate-300">
-            Join the marketplace where unused space, equipment and vehicles
-            find the people who need them.
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-mist-300 sm:text-base">
+            Join the marketplace where unused space, storage, vehicles and
+            equipment find the people who need them. Whether you are hunting for
+            somewhere to work this week or you have a resource sitting idle, one
+            account covers both sides.
           </p>
-          <ul className="mt-8 space-y-4 text-sm">
-            {[
-              ["Post requests in plain English", "AI parses your need into a structured request."],
-              ["Get scored matches instantly", "Five weighted factors: location, time, capacity, type, requirements."],
-              ["Book with confidence", "Conflict-checked bookings and reviews after completion."],
-            ].map(([title, desc]) => (
-              <li key={title} className="flex gap-3">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
-                <div>
-                  <p className="font-bold">{title}</p>
-                  <p className="text-xs text-slate-400">{desc}</p>
+
+          <ul className="mt-10 space-y-5">
+            {BENEFITS.map(([title, desc]) => (
+              <li key={title} className="flex gap-3.5">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-400" />
+                <div className="min-w-0">
+                  <p className="font-bold text-mist-100">{title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-mist-400">
+                    {desc}
+                  </p>
                 </div>
               </li>
             ))}
@@ -120,126 +132,143 @@ export default function Register() {
         </div>
 
         {/* Right: form */}
-        <div className="rounded-3xl bg-white p-6 text-slate-900 shadow-2xl sm:p-8">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-green-600 text-white">
+        <div className="rounded-3xl border border-white/10 bg-ink-800 p-6 shadow-2xl shadow-ink-950/50 sm:p-8">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-500/15 text-brand-400">
             <User className="h-5 w-5" />
           </span>
-          <h2 className="mt-4 text-xl font-extrabold">Register</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Registration does not log you in — sign in afterwards.
+          <h2 className="mt-5 text-xl font-extrabold text-mist-100">
+            Register
+          </h2>
+          <p className="mt-1.5 text-sm text-mist-400">
+            Registration doesn't log you in — you'll sign in next.
           </p>
 
           {error && (
-            <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <Alert tone="danger" className="mt-5">
               {error}
-            </p>
+            </Alert>
           )}
           {notice && (
-            <p className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
+            <Alert tone="success" className="mt-5">
               {notice}
-            </p>
+            </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-5 space-y-3">
-            <input
-              className={inputClass}
-              placeholder="username *"
-              aria-label="Username"
-              autoComplete="username"
-              value={form.username}
-              onChange={(e) => set("username", e.target.value)}
-              required
-            />
-            <div className="relative">
-              <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                className={`${inputClass} pl-9`}
-                type="email"
-                placeholder="email *"
-                aria-label="Email"
-                autoComplete="email"
-                value={form.email}
-                onChange={(e) => set("email", e.target.value)}
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <Field label="Username" htmlFor="reg-username">
+              <Input
+                id="reg-username"
+                placeholder="your_username"
+                autoComplete="username"
+                value={form.username}
+                onChange={(e) => set("username", e.target.value)}
                 required
               />
+            </Field>
+
+            <Field label="Email" htmlFor="reg-email">
+              <div className="relative">
+                <Mail className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-mist-500" />
+                <Input
+                  id="reg-email"
+                  className="pl-10"
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  required
+                />
+              </div>
+            </Field>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowPasswords((v) => !v)}
+                aria-pressed={showPasswords}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-mist-400 transition-colors hover:text-mist-200"
+              >
+                {showPasswords ? (
+                  <EyeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Eye className="h-3.5 w-3.5" />
+                )}
+                {showPasswords ? "Hide passwords" : "Show passwords"}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowPasswords((v) => !v)}
-              aria-pressed={showPasswords}
-              className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:outline-none"
-            >
-              {showPasswords ? (
-                <EyeOff className="h-3.5 w-3.5" />
-              ) : (
-                <Eye className="h-3.5 w-3.5" />
-              )}
-              {showPasswords ? "Hide passwords" : "Show passwords"}
-            </button>
+
             <div className="grid grid-cols-2 gap-3">
-              <input
-                className={inputClass}
-                type={showPasswords ? "text" : "password"}
-                placeholder="password *"
-                aria-label="Password"
-                autoComplete="new-password"
-                value={form.password}
-                onChange={(e) => set("password", e.target.value)}
-                required
-              />
-              <input
-                className={inputClass}
-                type={showPasswords ? "text" : "password"}
-                placeholder="confirm *"
-                aria-label="Confirm password"
-                autoComplete="new-password"
-                value={form.password_confirm}
-                onChange={(e) => set("password_confirm", e.target.value)}
-                required
-              />
-              <input
-                className={inputClass}
-                placeholder="first name"
-                aria-label="First name"
-                autoComplete="given-name"
-                value={form.first_name}
-                onChange={(e) => set("first_name", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="last name"
-                aria-label="Last name"
-                autoComplete="family-name"
-                value={form.last_name}
-                onChange={(e) => set("last_name", e.target.value)}
-              />
+              <Field label="Password" htmlFor="reg-password">
+                <Input
+                  id="reg-password"
+                  type={passwordType}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) => set("password", e.target.value)}
+                  required
+                />
+              </Field>
+              <Field label="Confirm" htmlFor="reg-confirm">
+                <Input
+                  id="reg-confirm"
+                  type={passwordType}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  value={form.password_confirm}
+                  onChange={(e) => set("password_confirm", e.target.value)}
+                  required
+                />
+              </Field>
             </div>
-            <div className="relative">
-              <Phone className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                className={`${inputClass} pl-9`}
-                placeholder="phone (optional)"
-                aria-label="Phone (optional)"
-                autoComplete="tel"
-                value={form.phone}
-                onChange={(e) => set("phone", e.target.value)}
-              />
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="First name" htmlFor="reg-first">
+                <Input
+                  id="reg-first"
+                  placeholder="Optional"
+                  autoComplete="given-name"
+                  value={form.first_name}
+                  onChange={(e) => set("first_name", e.target.value)}
+                />
+              </Field>
+              <Field label="Last name" htmlFor="reg-last">
+                <Input
+                  id="reg-last"
+                  placeholder="Optional"
+                  autoComplete="family-name"
+                  value={form.last_name}
+                  onChange={(e) => set("last_name", e.target.value)}
+                />
+              </Field>
             </div>
-            <button
-              type="submit"
-              disabled={busy}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50"
-            >
+
+            <Field label="Phone" htmlFor="reg-phone" hint="Optional.">
+              <div className="relative">
+                <Phone className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-mist-500" />
+                <Input
+                  id="reg-phone"
+                  className="pl-10"
+                  placeholder="+234…"
+                  autoComplete="tel"
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                />
+              </div>
+            </Field>
+
+            <Button type="submit" disabled={busy} fullWidth size="lg">
               {busy ? "Creating account…" : "Create account"}
               <ArrowRight className="h-4 w-4" />
-            </button>
+            </Button>
           </form>
 
-          <p className="mt-5 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-mist-400">
             Already registered?{" "}
             <Link
               to="/login"
-              className="font-bold text-green-700 hover:underline"
+              className="font-bold text-brand-400 transition-colors hover:text-brand-300"
             >
               Sign in
             </Link>

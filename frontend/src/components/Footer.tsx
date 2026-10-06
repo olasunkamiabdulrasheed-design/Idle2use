@@ -1,8 +1,8 @@
-/** Shared site footer (landing + auth pages). */
+/** Shared site footer (public pages). */
 
-import { Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../authContext";
+import Logo from "./ui/Logo";
 
 const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
@@ -19,13 +19,13 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
     links: [
       { label: "About", to: "/about" },
       { label: "Contact", to: "/contact" },
-      { label: "Trust & safety", to: "/#trust" },
+      { label: "Trust & safety", to: "/how-it-works/trust" },
     ],
   },
   {
     title: "Get started",
     links: [
-      { label: "Login", to: "/login" },
+      { label: "Log in", to: "/login" },
       { label: "Create account", to: "/register" },
     ],
   },
@@ -33,20 +33,16 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
 
 export default function Footer() {
   const { health } = useAuth();
+  const online = health.state === "ok";
 
   return (
-    <footer className="border-t border-white/10 bg-[#070e1d] text-slate-400">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+    <footer className="border-t border-white/10 bg-ink-950">
+      <div className="container-page py-12 sm:py-14">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-[1.6fr_repeat(3,1fr)]">
           {/* Brand */}
           <div>
-            <span className="flex items-center gap-2 text-lg font-extrabold text-white">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-                <Zap className="h-4 w-4 text-white" fill="currentColor" />
-              </span>
-              Idle<span className="text-green-500">2</span>Use
-            </span>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed">
+            <Logo />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-mist-400">
               The capacity marketplace. Turn unused space, equipment and
               vehicles into opportunity — or find exactly what you need, when
               you need it.
@@ -55,15 +51,15 @@ export default function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <p className="text-xs font-bold tracking-widest text-white uppercase">
+              <p className="text-xs font-bold tracking-[0.14em] text-mist-100 uppercase">
                 {col.title}
               </p>
-              <ul className="mt-4 space-y-2.5 text-sm">
+              <ul className="mt-4 space-y-3 text-sm">
                 {col.links.map((l) => (
                   <li key={l.label}>
                     <Link
                       to={l.to}
-                      className="transition-colors hover:text-green-400"
+                      className="text-mist-400 transition-colors hover:text-brand-400"
                     >
                       {l.label}
                     </Link>
@@ -74,16 +70,17 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 text-center text-xs sm:flex-row sm:text-left">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-center text-xs text-mist-500 sm:flex-row sm:text-left">
           <span>© {new Date().getFullYear()} Idle2Use. Built for the hackathon demo.</span>
           <span className="inline-flex items-center gap-2">
             <span
+              aria-hidden="true"
               className={`h-1.5 w-1.5 rounded-full ${
-                health.state === "ok" ? "bg-green-500" : "bg-red-500"
+                online ? "bg-brand-500" : "bg-danger-500"
               }`}
             />
-            {health.state === "ok"
-              ? "API Online · All systems operational"
+            {online
+              ? "API online · All systems operational"
               : "API status unavailable"}
           </span>
         </div>

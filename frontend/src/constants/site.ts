@@ -1,13 +1,12 @@
-/** Shared landing/about content constants (single source of truth). */
+/** Shared marketing copy (single source of truth for categories and trust).
+ * Written to read as real product copy rather than labels: each entry says
+ * what the thing is AND why someone would care about it. */
 
 import {
   Boxes,
   Building2,
-  Handshake,
   Lock,
-  PenLine,
   ShieldCheck,
-  Sparkles,
   Star,
   Truck,
   Wrench,
@@ -22,40 +21,22 @@ export const CATEGORIES: {
   {
     Icon: Building2,
     name: "Spaces & Venues",
-    desc: "Halls, classrooms, meeting rooms, event spaces",
+    desc: "Halls, classrooms, meeting rooms and event venues that sit empty between bookings. Perfect for workshops, rehearsals, trainings and one-off gatherings.",
   },
   {
     Icon: Boxes,
     name: "Storage",
-    desc: "Warehouses, containers, secure storage",
+    desc: "Warehouses, containers, spare rooms and secure yards with room to spare. Keep stock, equipment or seasonal inventory safe for exactly as long as you need it.",
   },
   {
     Icon: Truck,
     name: "Transportation",
-    desc: "Vehicles, trucks, delivery capacity",
+    desc: "Vans, trucks, buses and drivers with hours left in the week. Move goods, people or deliveries without buying and maintaining a fleet of your own.",
   },
   {
     Icon: Wrench,
     name: "Equipment",
-    desc: "Tools, machinery, specialized equipment",
-  },
-];
-
-export const STEPS: { Icon: LucideIcon; title: string; desc: string }[] = [
-  {
-    Icon: PenLine,
-    title: "Describe what you need",
-    desc: "Type it in plain English — our AI structures your request.",
-  },
-  {
-    Icon: Sparkles,
-    title: "Get matched instantly",
-    desc: "The matching engine scores available capacity against your needs.",
-  },
-  {
-    Icon: Handshake,
-    title: "Book & collaborate",
-    desc: "Confirm bookings, message providers, and leave reviews.",
+    desc: "Tools, machinery, cameras, sound systems and specialist kit that spends most of the year in a cupboard. Earn from it while it is idle, or borrow what you need.",
   },
 ];
 
@@ -66,17 +47,17 @@ export const TRUST: {
 }[] = [
   {
     Icon: ShieldCheck,
-    title: "Verified profiles",
-    desc: "Phone and identity verification flags on every account.",
+    title: "Profiles you can check",
+    desc: "Every account carries contact details and verification status flags, so you can see exactly who you are dealing with before you commit to anything.",
   },
   {
     Icon: Star,
-    title: "Real reviews",
-    desc: "Ratings only after completed bookings — no fake trust.",
+    title: "Reviews that mean something",
+    desc: "Ratings can only be left by the two parties on a completed booking. No completed exchange, no review — which is what keeps the feedback honest.",
   },
   {
     Icon: Lock,
-    title: "Backend-owned rules",
-    desc: "Access, ownership and conflicts enforced by the API.",
+    title: "Rules the API enforces",
+    desc: "Access, ownership and booking conflicts are checked server-side on every single request, so they hold no matter which screen you are looking at.",
   },
 ];

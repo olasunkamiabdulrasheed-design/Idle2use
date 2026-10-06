@@ -8,15 +8,21 @@ import {
   Eye,
   EyeOff,
   Lock,
-  ShieldCheck,
   User,
 } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { formatApiError, useAuth } from "../authContext";
 import { usePageTitle } from "../hooks/usePageTitle";
+import Alert from "../components/ui/Alert";
+import Button from "../components/ui/Button";
+import Logo from "../components/ui/Logo";
+import { Field, Input } from "../components/ui/Field";
 
-const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100";
+const BENEFITS = [
+  "Pick up exactly where your requests left off — nothing is lost between visits",
+  "See new matches, booking updates and replies the moment they arrive",
+  "Message providers directly and keep every confirmation in one thread",
+];
 
 export default function Login() {
   const { user, login, sessionMessage, clearSessionMessage } = useAuth();
@@ -47,86 +53,92 @@ export default function Login() {
   }
 
   return (
-    <div className="grid min-h-screen bg-slate-100 lg:grid-cols-2">
+    <div className="grid min-h-screen bg-ink-900 lg:grid-cols-2">
       {/* Brand panel */}
-      <div className="relative hidden flex-col justify-between bg-[#0a1428] p-10 text-white lg:flex">
-        <Link to="/" className="flex items-center gap-2 text-lg font-extrabold">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-            <ShieldCheck className="h-4 w-4" />
-          </span>
-          Idle<span className="text-green-500">2</span>Use
-        </Link>
-        <div>
-          <h1 className="text-3xl leading-tight font-extrabold">
+      <div className="relative hidden flex-col justify-between overflow-hidden border-r border-white/10 bg-ink-950 p-12 lg:flex">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-32 -left-24 h-96 w-96 rounded-full bg-brand-500/12 blur-[110px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-0 bottom-0 h-80 w-80 rounded-full bg-sky-500/10 blur-[100px]"
+        />
+
+        <Logo className="relative" size="md" />
+
+        <div className="relative">
+          <h1 className="max-w-md text-3xl leading-tight font-extrabold text-mist-100">
             Welcome back to the{" "}
-            <span className="text-green-500">capacity marketplace.</span>
+            <span className="bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent">
+              capacity marketplace.
+            </span>
           </h1>
-          <ul className="mt-6 space-y-3 text-sm text-slate-300">
-            {[
-              "Pick up where your requests left off",
-              "Review new matches and booking updates",
-              "Message providers and track confirmations",
-            ].map((item) => (
-              <li key={item} className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+          <ul className="mt-8 space-y-3.5 text-sm text-mist-300">
+            {BENEFITS.map((item) => (
+              <li key={item} className="flex items-center gap-3">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
                 {item}
               </li>
             ))}
           </ul>
         </div>
-        <p className="text-xs text-slate-500">
-          Secure sign-in · Messages, bookings and matches in one place
+
+        <p className="relative text-xs text-mist-500">
+          Secure sign-in · Your requests, matches, bookings and messages, all
+          waiting where you left them
         </p>
       </div>
 
       {/* Form panel */}
-      <div className="flex items-center justify-center px-4 py-10 sm:px-8">
+      <div className="flex items-center justify-center px-4 py-12 sm:px-8">
         <div className="w-full max-w-md">
+          <div className="mb-8 flex items-center justify-between lg:hidden">
+            <Logo size="sm" />
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-mist-400 transition-colors hover:text-mist-100"
+            >
+              <ArrowLeft className="h-4 w-4" /> Home
+            </Link>
+          </div>
+
           <Link
             to="/"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800"
+            className="mb-6 hidden items-center gap-1.5 text-sm font-semibold text-mist-400 transition-colors hover:text-mist-100 lg:inline-flex"
           >
             <ArrowLeft className="h-4 w-4" /> Back to home
           </Link>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+          <div className="rounded-3xl border border-white/10 bg-ink-800 p-7 shadow-2xl shadow-ink-950/50 sm:p-8">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-500/15 text-brand-400">
               <User className="h-5 w-5" />
             </span>
-            <h2 className="mt-4 text-2xl font-extrabold text-slate-900">
+            <h2 className="mt-5 text-2xl font-extrabold text-mist-100">
               Sign in
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Access your Idle2Use dashboard.
+            <p className="mt-1.5 text-sm text-mist-400">
+              Sign in to reach your dashboard, matches and bookings.
             </p>
 
             {sessionMessage && (
-              <p
-                role="status"
-                className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800"
-              >
+              <Alert tone="warning" className="mt-5">
                 {sessionMessage}
-              </p>
+              </Alert>
             )}
             {error && (
-              <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <Alert tone="danger" className="mt-5">
                 {error}
-              </p>
+              </Alert>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-              <div>
-                <label
-                  htmlFor="login-username"
-                  className="text-xs font-bold text-slate-600"
-                >
-                  Username
-                </label>
-                <div className="relative mt-1">
-                  <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <Field label="Username" htmlFor="login-username">
+                <div className="relative">
+                  <User className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-mist-500" />
+                  <Input
                     id="login-username"
-                    className={`${inputClass} pl-9`}
+                    className="pl-10"
                     placeholder="your_username"
                     autoComplete="username"
                     value={username}
@@ -134,19 +146,14 @@ export default function Login() {
                     required
                   />
                 </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="login-password"
-                  className="text-xs font-bold text-slate-600"
-                >
-                  Password
-                </label>
-                <div className="relative mt-1">
-                  <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
+              </Field>
+
+              <Field label="Password" htmlFor="login-password">
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-mist-500" />
+                  <Input
                     id="login-password"
-                    className={`${inputClass} pr-10 pl-9`}
+                    className="pr-11 pl-10"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     autoComplete="current-password"
@@ -157,10 +164,8 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-lg p-1.5 text-mist-500 transition-colors hover:bg-white/[0.08] hover:text-mist-200"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -169,22 +174,19 @@ export default function Login() {
                     )}
                   </button>
                 </div>
-              </div>
-              <button
-                type="submit"
-                disabled={busy}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
-              >
+              </Field>
+
+              <Button type="submit" disabled={busy} fullWidth size="lg">
                 {busy ? "Signing in…" : "Sign in"}
                 <ArrowRight className="h-4 w-4" />
-              </button>
+              </Button>
             </form>
 
-            <p className="mt-5 text-center text-sm text-slate-500">
+            <p className="mt-6 text-center text-sm text-mist-400">
               New to Idle2Use?{" "}
               <Link
                 to="/register"
-                className="font-bold text-green-700 hover:underline"
+                className="font-bold text-brand-400 transition-colors hover:text-brand-300"
               >
                 Create an account
               </Link>

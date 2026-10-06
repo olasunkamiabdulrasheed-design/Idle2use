@@ -13,21 +13,21 @@ export function HowHero({
   subtitle: string;
 }) {
   return (
-    <div className="max-w-3xl pt-8 sm:pt-10">
-      <span className="inline-flex items-center gap-2 rounded-full border border-green-500/40 bg-green-500/10 px-3 py-1 text-[11px] font-bold tracking-widest text-green-400 uppercase">
+    <div className="max-w-3xl pt-12 sm:pt-16">
+      <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-3.5 py-1.5 text-[11px] font-bold tracking-[0.14em] text-brand-300 uppercase">
         <Sparkles className="h-3.5 w-3.5 shrink-0" /> How it works
       </span>
-      <h1 className="mt-4 text-3xl font-extrabold break-words sm:text-4xl">
+      <h1 className="mt-5 text-3xl leading-tight font-extrabold break-words text-mist-100 sm:text-4xl lg:text-5xl">
         {title}
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-slate-300 sm:text-base">
+      <p className="mt-4 text-sm leading-relaxed text-mist-300 sm:text-base">
         {subtitle}
       </p>
     </div>
   );
 }
 
-/** Step list item (navy surface). */
+/** Step list item. */
 export function StepRow({
   n,
   title,
@@ -38,13 +38,13 @@ export function StepRow({
   desc: string;
 }) {
   return (
-    <li className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-extrabold text-white">
-        {n}
+    <li className="flex gap-4 rounded-2xl border border-white/10 bg-ink-800 p-4 transition-colors hover:border-white/20 sm:p-5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/15 text-sm font-extrabold text-brand-400">
+        {String(n).padStart(2, "0")}
       </span>
       <div className="min-w-0">
-        <p className="font-bold text-white">{title}</p>
-        <p className="mt-1 text-sm text-slate-400">{desc}</p>
+        <p className="font-bold text-mist-100">{title}</p>
+        <p className="mt-1 text-sm leading-relaxed text-mist-400">{desc}</p>
       </div>
     </li>
   );
@@ -53,23 +53,23 @@ export function StepRow({
 /** Horizontal (desktop) / vertical (mobile) flow of labelled chips. */
 export function FlowRow({ items }: { items: string[] }) {
   return (
-    <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-3">
+    <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center md:gap-2.5">
       {items.map((label, i) => (
         <Fragment key={label}>
           {i > 0 && (
             <>
               <ArrowDown
                 aria-hidden="true"
-                className="mx-auto h-5 w-5 shrink-0 text-green-500/60 md:hidden"
+                className="mx-auto h-5 w-5 shrink-0 text-brand-500/50 md:hidden"
               />
               <ArrowRight
                 aria-hidden="true"
-                className="hidden h-5 w-5 shrink-0 text-green-500/60 md:block"
+                className="hidden h-5 w-5 shrink-0 text-brand-500/50 md:block"
               />
             </>
           )}
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center md:flex-1">
-            <p className="text-sm font-bold text-white">{label}</p>
+          <div className="rounded-2xl border border-white/10 bg-ink-850 px-4 py-3.5 text-center md:flex-1">
+            <p className="text-sm font-bold text-mist-100">{label}</p>
           </div>
         </Fragment>
       ))}
@@ -77,7 +77,7 @@ export function FlowRow({ items }: { items: string[] }) {
   );
 }
 
-/** Navigation card to another How It Works page (white, like landing cards). */
+/** Navigation card to another How It Works page. */
 export function NavCard({
   to,
   Icon,
@@ -92,14 +92,16 @@ export function NavCard({
   return (
     <Link
       to={to}
-      className="group flex flex-col rounded-2xl bg-white p-5 text-slate-900 shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+      className="group flex flex-col rounded-2xl border border-white/10 bg-ink-800 p-5 transition-colors hover:border-brand-500/40 focus-visible:outline-none"
     >
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white transition-colors group-hover:bg-green-600">
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/12 text-brand-400 transition-colors group-hover:bg-brand-600 group-hover:text-white">
         <Icon className="h-5 w-5" />
       </span>
-      <h3 className="mt-3 font-bold">{title}</h3>
-      <p className="mt-1 text-xs leading-relaxed text-slate-500">{desc}</p>
-      <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-green-700">
+      <h3 className="mt-4 font-bold text-mist-100">{title}</h3>
+      <p className="mt-1.5 flex-1 text-xs leading-relaxed text-mist-400">
+        {desc}
+      </p>
+      <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-400">
         Open
         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
       </span>
@@ -107,22 +109,32 @@ export function NavCard({
   );
 }
 
-/** Closing CTA band. */
+/** Closing CTA band. `subtext` carries the supporting sentence that sits
+ * under the headline — it is what turns the band from a shout into an offer. */
 export function CtaBand({
   text,
+  subtext,
   to,
   label,
 }: {
   text: string;
+  subtext?: string;
   to: string;
   label: string;
 }) {
   return (
-    <div className="mt-12 rounded-3xl bg-green-600 p-6 text-center sm:p-8">
-      <h2 className="text-xl font-extrabold text-white">{text}</h2>
+    <div className="mt-14 overflow-hidden rounded-3xl border border-brand-500/25 bg-gradient-to-br from-brand-600/20 via-ink-800 to-ink-800 p-8 text-center sm:p-12">
+      <h2 className="text-2xl font-extrabold text-mist-100 sm:text-3xl">
+        {text}
+      </h2>
+      {subtext && (
+        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-mist-300 sm:text-base">
+          {subtext}
+        </p>
+      )}
       <Link
         to={to}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none sm:w-auto"
+        className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-brand-600/25 transition-colors hover:bg-brand-500 sm:w-auto"
       >
         {label} <ArrowRight className="h-4 w-4" />
       </Link>

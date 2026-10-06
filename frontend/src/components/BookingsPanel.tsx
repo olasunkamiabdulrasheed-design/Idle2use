@@ -1,6 +1,7 @@
-/** Stage 9/10: bookings lifecycle + reviews. */
+/** Bookings lifecycle + reviews. */
 
 import { useCallback, useEffect, useState } from "react";
+import { Star } from "lucide-react";
 import { friendlyError } from "../api/auth";
 import {
   createReview,
@@ -9,13 +10,11 @@ import {
   updateBooking,
 } from "../api/bookings";
 import type { Booking, Review } from "../types/bookings";
-
-const STATUS_STYLES: Record<Booking["status"], string> = {
-  pending: "bg-amber-100 text-amber-800",
-  confirmed: "bg-green-100 text-green-800",
-  completed: "bg-slate-200 text-slate-700",
-  cancelled: "bg-red-100 text-red-700",
-};
+import Alert from "./ui/Alert";
+import Badge, { statusTone } from "./ui/Badge";
+import Button from "./ui/Button";
+import Card from "./ui/Card";
+import { Textarea } from "./ui/Field";
 
 function timeOnly(iso: string) {
   return iso.slice(11, 16);
@@ -87,66 +86,82 @@ export default function BookingsPanel({
     if (b.status === "pending" && isProvider)
       return (
         <>
-          <Btn green onClick={() => act(b, "confirmed")}>Confirm</Btn>
-          <Btn red onClick={() => act(b, "cancelled")}>Decline</Btn>
+          <Button size="sm" onClick={() => act(b, "confirmed")}>
+            Confirm
+          </Button>
+          <Button size="sm" variant="danger" onClick={() => act(b, "cancelled")}>
+            Decline
+          </Button>
         </>
       );
     if (b.status === "pending" && !isProvider)
-      return <Btn red onClick={() => act(b, "cancelled")}>Cancel</Btn>;
+      return (
+        <Button size="sm" variant="danger" onClick={() => act(b, "cancelled")}>
+          Cancel
+        </Button>
+      );
     if (b.status === "confirmed" && isProvider)
       return (
         <>
-          <Btn green onClick={() => act(b, "completed")}>Complete</Btn>
-          <Btn red onClick={() => act(b, "cancelled")}>Cancel</Btn>
+          <Button size="sm" onClick={() => act(b, "completed")}>
+            Complete
+          </Button>
+          <Button size="sm" variant="danger" onClick={() => act(b, "cancelled")}>
+            Cancel
+          </Button>
         </>
       );
     if (b.status === "confirmed")
-      return <Btn red onClick={() => act(b, "cancelled")}>Cancel</Btn>;
+      return (
+        <Button size="sm" variant="danger" onClick={() => act(b, "cancelled")}>
+          Cancel
+        </Button>
+      );
     if (b.status === "completed" && !hasReviewed(b.id))
       return (
-        <Btn green onClick={() => setReviewFor(b.id)}>Leave review</Btn>
+        <Button size="sm" onClick={() => setReviewFor(b.id)}>
+          Leave review
+        </Button>
       );
     return null;
   }
 
-  function list(title: string, items: Booking[]) {
+  function list(title: string, items: Booking[], empty: string) {
     return (
-      <div>
-        <p className="mb-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
+      <div className="min-w-0">
+        <p className="mb-3 text-xs font-bold tracking-wide text-mist-500 uppercase">
           {title}
         </p>
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {items.length === 0 && (
-            <li className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">
-              Nothing here yet.
+            <li className="rounded-xl border border-dashed border-white/10 p-4 text-sm leading-relaxed text-mist-500">
+              {empty}
             </li>
           )}
           {items.map((b) => (
             <li
               key={b.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 p-3"
+              className="rounded-xl border border-white/10 bg-ink-850 p-3.5"
             >
-              <div className="text-sm">
-                <span className="font-semibold text-slate-900">
-                  {b.resource_name}
-                </span>{" "}
-                <span className="text-slate-500">· {b.date}</span>
-                <span className="text-slate-500">
-                  {" "}
-                  {timeOnly(b.start_time)}–{timeOnly(b.end_time)}
-                </span>
-                <span className="block text-xs text-slate-500">
-                  {b.requester_username} → {b.provider_username}
-                  {b.agreed_price ? ` · agreed: ${b.agreed_price}` : ""}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${STATUS_STYLES[b.status]}`}
-                >
-                  {b.status}
-                </span>
-                {actions(b)}
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 text-sm">
+                  <span className="font-semibold text-mist-100">
+                    {b.resource_name}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-mist-400">
+                    {b.date} · {timeOnly(b.start_time)}–{timeOnly(b.end_time)}
+                  </span>
+                  <span className="mt-1 block text-xs text-mist-500">
+                    {b.requester_username} → {b.provider_username}
+                    {b.agreed_price ? ` · agreed: ${b.agreed_price}` : ""}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge tone={statusTone(b.status)} className="capitalize">
+                    {b.status}
+                  </Badge>
+                  {actions(b)}
+                </div>
               </div>
             </li>
           ))}
@@ -156,115 +171,104 @@ export default function BookingsPanel({
   }
 
   return (
-    <section className="rounded-2xl bg-white p-6 shadow">
-      <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">
-        Bookings & Reviews
-      </p>
-      <h2 className="text-lg font-bold text-slate-900">Bookings</h2>
-      {error && (
-        <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </p>
-      )}
+    <div className="space-y-5">
+      {error && <Alert tone="danger">{error}</Alert>}
 
       {reviewFor !== null && (
-        <div className="mt-4 rounded-xl border border-green-700 p-4">
-          <p className="text-sm font-bold text-slate-900">Rate this booking</p>
-          <div className="mt-2 flex items-center gap-2">
+        <Card tone="brand">
+          <p className="text-sm font-bold text-mist-100">
+            Rate booking #{reviewFor}
+          </p>
+          <p className="mt-1 text-sm text-mist-400">
+            Reviews unlock after a completed booking — one per booking.
+          </p>
+
+          <div className="mt-4 flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
                 type="button"
                 onClick={() => setRating(n)}
-                className={`h-8 w-8 rounded-lg text-sm font-bold ${
+                aria-label={`${n} star${n === 1 ? "" : "s"}`}
+                aria-pressed={rating >= n}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
                   rating >= n
-                    ? "bg-green-700 text-white"
-                    : "bg-slate-200 text-slate-600"
+                    ? "bg-brand-600 text-white"
+                    : "border border-white/15 bg-white/[0.04] text-mist-500 hover:text-mist-300"
                 }`}
               >
-                ★
+                <Star
+                  className="h-4 w-4"
+                  fill={rating >= n ? "currentColor" : "none"}
+                />
               </button>
             ))}
           </div>
-          <textarea
-            className="mt-2 w-full rounded-lg border border-slate-300 p-2 text-sm"
+
+          <Textarea
+            className="mt-3"
             rows={2}
             placeholder="Comment (optional)"
+            aria-label="Review comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={submitReview}
-              className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Submit review
-            </button>
-            <button
-              type="button"
-              onClick={() => setReviewFor(null)}
-              className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
-            >
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button onClick={submitReview}>Submit review</Button>
+            <Button variant="secondary" onClick={() => setReviewFor(null)}>
               Cancel
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
 
-      <div className="mt-4 grid gap-6 md:grid-cols-2">
-        {list("Requests I made", mine)}
-        {list("Requests to my resources", incoming)}
-      </div>
+      <Card>
+        <div className="grid gap-6 md:grid-cols-2">
+          {list(
+            "Requests I made",
+            mine,
+            "You have not booked anyone yet. Find a resource you like, message the provider, and the booking will show up here once it is created.",
+          )}
+          {list(
+            "Requests to my resources",
+            incoming,
+            "Nobody has booked your resources yet. Keep your availability up to date — requests come through as soon as something you list is matched.",
+          )}
+        </div>
+      </Card>
 
-      <p className="mt-6 mb-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
-        Reviews received
-      </p>
-      <ul className="space-y-2">
-        {reviews.length === 0 && (
-          <li className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">
-            No reviews yet — complete a booking first.
-          </li>
-        )}
-        {reviews.map((r) => (
-          <li
-            key={r.id}
-            className="rounded-xl border border-slate-200 p-3 text-sm"
-          >
-            <span className="font-bold text-slate-900">
-              {"★".repeat(r.rating)}
-              {"☆".repeat(5 - r.rating)}
-            </span>{" "}
-            <span className="text-slate-600">
-              {r.reviewer_username} → {r.reviewee_username}
-            </span>
-            {r.comment && <p className="text-slate-800">{r.comment}</p>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function Btn({
-  children,
-  onClick,
-  green,
-}: {
-  children: string;
-  onClick: () => void;
-  green?: boolean;
-  red?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-white ${
-        green ? "bg-green-700" : "bg-red-600"
-      }`}
-    >
-      {children}
-    </button>
+      <Card>
+        <h2 className="text-base font-bold text-mist-100">Reviews received</h2>
+        <ul className="mt-4 space-y-2.5">
+          {reviews.length === 0 && (
+            <li className="rounded-xl border border-dashed border-white/10 p-4 text-sm leading-relaxed text-mist-500">
+              No reviews yet. Once a booking is marked complete, whoever you
+              dealt with can leave you one — and their words will show up here.
+            </li>
+          )}
+          {reviews.map((r) => (
+            <li
+              key={r.id}
+              className="rounded-xl border border-white/10 bg-ink-850 p-3.5 text-sm"
+            >
+              <span
+                className="text-warn-400"
+                aria-label={`${r.rating} out of 5`}
+              >
+                {"★".repeat(r.rating)}
+                <span className="text-mist-500">{"☆".repeat(5 - r.rating)}</span>
+              </span>{" "}
+              <span className="text-mist-400">
+                {r.reviewer_username} → {r.reviewee_username}
+              </span>
+              {r.comment && (
+                <p className="mt-1.5 text-mist-200">{r.comment}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </div>
   );
 }

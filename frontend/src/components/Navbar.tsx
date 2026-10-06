@@ -1,9 +1,11 @@
-/** Public site header — shared by Landing/About/Contact/404.
- * Desktop: logo + nav + auth CTAs. Mobile: logo + hamburger drawer. */
+/** Public site header — shared by Landing/About/Contact/How It Works/404.
+ * Sticky with a blurred backdrop; desktop nav with active indicator,
+ * mobile hamburger drawer. */
 
 import { useEffect, useState } from "react";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import Logo from "./ui/Logo";
 
 const NAV_LINKS = [
   { label: "Home", to: "/" },
@@ -22,36 +24,39 @@ export default function Navbar() {
     setOpen(false);
   }, [location.pathname, location.hash]);
 
-  // Escape closes the drawer.
+  // Escape closes the drawer; lock body scroll while it is open.
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false);
     }
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
+  const isActive = (to: string) =>
+    to.startsWith("/#") ? false : location.pathname === to;
+
   return (
-    <header className="relative border-b border-white/10">
-      <div className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-8 lg:px-12 2xl:px-16">
-        <Link
-          to="/"
-          className="flex shrink-0 items-center gap-2 text-lg font-extrabold text-white focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none rounded"
-        >
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-green-600">
-            <Zap className="h-4 w-4 text-white" fill="currentColor" />
-          </span>
-          Idle<span className="text-green-500">2</span>Use
-        </Link>
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-ink-900/80 backdrop-blur-xl">
+      <div className="container-wide flex items-center justify-between gap-4 py-3.5">
+        <Logo />
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-4 text-sm text-slate-300 lg:flex xl:gap-6">
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.label}
               to={l.to}
-              className="rounded focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none hover:text-white"
+              className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                isActive(l.to)
+                  ? "text-mist-100"
+                  : "text-mist-400 hover:bg-white/[0.06] hover:text-mist-100"
+              }`}
             >
               {l.label}
             </Link>
@@ -59,25 +64,25 @@ export default function Navbar() {
         </nav>
 
         {/* Desktop CTAs */}
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
           <Link
             to="/login"
-            className="rounded-lg border border-white/20 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+            className="rounded-xl px-4 py-2 text-sm font-semibold text-mist-200 transition-colors hover:bg-white/[0.06] hover:text-mist-100"
           >
-            Login
+            Log in
           </Link>
           <Link
             to="/register"
-            className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-green-700 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+            className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-brand-600/20 transition-colors hover:bg-brand-500"
           >
-            Get Started
+            Get started
           </Link>
         </div>
 
         {/* Mobile hamburger */}
         <button
           type="button"
-          className="rounded-lg border border-white/20 p-2 text-white lg:hidden"
+          className="rounded-xl border border-white/15 p-2 text-mist-100 transition-colors hover:bg-white/[0.06] lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="site-mobile-menu"
@@ -91,14 +96,14 @@ export default function Navbar() {
       {open && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+            className="fixed inset-0 z-40 bg-ink-950/70 backdrop-blur-sm lg:hidden"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
           <nav
             id="site-mobile-menu"
             aria-label="Mobile navigation"
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-white/10 bg-[#0a1428] px-4 py-4 shadow-2xl lg:hidden"
+            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-white/10 bg-ink-900 px-4 pt-3 pb-5 shadow-2xl lg:hidden"
           >
             <ul className="space-y-1">
               {NAV_LINKS.map((l) => (
@@ -106,27 +111,31 @@ export default function Navbar() {
                   <Link
                     to={l.to}
                     onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-200 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+                    className={`block rounded-xl px-3.5 py-3 text-sm font-semibold transition-colors ${
+                      isActive(l.to)
+                        ? "bg-white/[0.08] text-mist-100"
+                        : "text-mist-300 hover:bg-white/[0.06] hover:text-mist-100"
+                    }`}
                   >
                     {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
-            <div className="mt-3 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
               <Link
                 to="/login"
                 onClick={() => setOpen(false)}
-                className="rounded-lg border border-white/20 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/10"
+                className="rounded-xl border border-white/15 px-4 py-2.5 text-center text-sm font-semibold text-mist-100 transition-colors hover:bg-white/[0.06]"
               >
-                Login
+                Log in
               </Link>
               <Link
                 to="/register"
                 onClick={() => setOpen(false)}
-                className="rounded-lg bg-green-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-green-700"
+                className="rounded-xl bg-brand-600 px-4 py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-brand-500"
               >
-                Get Started
+                Get started
               </Link>
             </div>
           </nav>

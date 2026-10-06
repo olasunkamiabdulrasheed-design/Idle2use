@@ -2,8 +2,8 @@
 
 import {
   ArrowRight,
-  Building2,
   Boxes,
+  Building2,
   CalendarCheck,
   MessageSquare,
   PenLine,
@@ -22,22 +22,22 @@ const JOURNEY = [
   {
     Icon: PenLine,
     title: "Describe",
-    desc: "Say what you need, or add details about what you can offer.",
+    desc: "Write what you need in a sentence, or list the capacity you have to offer. No long forms, no jargon — plain language is enough to start.",
   },
   {
     Icon: Sparkles,
     title: "Find a match",
-    desc: "Relevant requests and available resources are matched.",
+    desc: "Your request is checked against every available resource, and only the ones that genuinely fit come back — each with a score and the reasons behind it.",
   },
   {
     Icon: MessageSquare,
     title: "Connect",
-    desc: "Compare the details and message the other person.",
+    desc: "Read the details side by side, then message the other person directly to ask questions, agree terms, and settle anything the listing does not cover.",
   },
   {
     Icon: CalendarCheck,
     title: "Arrange a booking",
-    desc: "Agree on the details and manage the booking in one place.",
+    desc: "Create the booking, both sides confirm it, and everything — status, messages and history — stays in one place you can come back to.",
   },
 ];
 
@@ -47,14 +47,14 @@ const GUIDES = [
     Icon: Search,
     label: "I need capacity",
     title: "Find a space or resource",
-    desc: "Describe what you are looking for, review suitable matches, and connect with a provider.",
+    desc: "Describe what you are looking for, review the matches that actually fit your date, location and size, and connect with a provider who has it free.",
   },
   {
     to: "/how-it-works/provider",
     Icon: Boxes,
     label: "I have capacity",
     title: "Make a resource available",
-    desc: "List what you have, add availability, and hear from people looking for it.",
+    desc: "List what you have, set the hours it is genuinely free, and let matching bring the right requests to you instead of chasing them yourself.",
   },
 ];
 
@@ -63,13 +63,13 @@ const MORE_GUIDES = [
     to: "/how-it-works/matching",
     Icon: Sparkles,
     title: "How matching works",
-    desc: "Eligibility checks and match scores",
+    desc: "The eligibility gates every resource must clear, and the five weighted factors that decide the final score",
   },
   {
     to: "/how-it-works/trust",
     Icon: ShieldCheck,
     title: "Trust & reliability",
-    desc: "Bookings, reviews, and account access",
+    desc: "How bookings, reviews and account access are enforced — including what is deliberately left out of this MVP",
   },
 ];
 
@@ -78,247 +78,273 @@ export default function HowOverview() {
   usePageTitle("How It Works");
 
   return (
-    <div className="pb-12">
-      <div className="mx-auto w-full max-w-screen-2xl">
-        <section className="relative isolate grid overflow-hidden border-b border-white/10 bg-[#0b192e] -mx-4 sm:-mx-8 lg:-mx-12 2xl:-mx-16 lg:min-h-[560px] lg:grid-cols-2">
-          <div className="flex flex-col justify-center px-5 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20 xl:px-20 2xl:px-24">
-            <p className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.16em] text-green-400 uppercase">
+    <div>
+      {/* Hero */}
+      <section className="relative isolate overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10"
+        >
+          <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-brand-500/12 blur-[110px]" />
+          <div className="absolute top-10 right-0 h-72 w-72 rounded-full bg-sky-500/10 blur-[100px]" />
+        </div>
+
+        <div className="grid items-center gap-12 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+          <div className="min-w-0">
+            <p className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] text-brand-400 uppercase">
               <Sparkles className="h-4 w-4" />
               How Idle2Use works
             </p>
-            <h1 className="mt-5 max-w-2xl text-4xl leading-[1.05] font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
+            <h1 className="mt-5 text-4xl leading-[1.05] font-extrabold tracking-tight text-mist-100 sm:text-5xl lg:text-6xl">
               Put idle capacity to work.{" "}
-              <span className="text-green-400">Find what you need.</span>
+              <span className="bg-gradient-to-r from-brand-300 to-brand-500 bg-clip-text text-transparent">
+                Find what you need.
+              </span>
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
-              Find space, storage, transportation, or equipment — or help
-              someone else put theirs to use. Idle2Use brings both sides
-              together to connect and arrange a booking.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-mist-300 sm:text-lg">
+              Space, storage, transportation and equipment all sit unused
+              somewhere nearby. Idle2Use is where the people who have that spare
+              capacity meet the people who need it — matching them up, and
+              giving both sides one place to agree the details.
             </p>
-            <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row">
+            <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
               <Link
                 to={user ? "/app/find" : "/register"}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-green-700 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-brand-600/25 transition-colors hover:bg-brand-500"
               >
                 Get started <ArrowRight className="h-4 w-4" />
               </Link>
               <a
                 href="#steps"
-                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/20 px-5 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] px-6 py-3.5 text-sm font-semibold text-mist-200 transition-colors hover:border-white/30 hover:text-mist-100"
               >
                 See how it works
               </a>
             </div>
           </div>
 
+          {/* Illustration */}
           <div
             aria-label="Illustration of a space and transport resource connected through Idle2Use"
-            className="relative isolate flex min-h-[280px] items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_45%,rgba(34,197,94,0.24),transparent_52%),linear-gradient(135deg,#102d39,#0c2230_55%,#111b30)] sm:min-h-[360px] lg:min-h-full"
+            className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(ellipse_at_50%_45%,rgba(34,197,94,0.22),transparent_55%),linear-gradient(135deg,#102d39,#0c2230_55%,#111b30)] sm:min-h-[340px]"
           >
             <div
               aria-hidden="true"
-              className="absolute inset-0 opacity-[0.13] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_78%)]"
+              className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_78%)]"
             />
             <div
               aria-hidden="true"
-              className="absolute h-[min(74vw,390px)] w-[min(74vw,390px)] rounded-full border border-green-300/15 sm:h-[390px] sm:w-[390px]"
+              className="absolute h-[min(64vw,320px)] w-[min(64vw,320px)] rounded-full border border-brand-300/15"
             />
             <div
               aria-hidden="true"
-              className="absolute h-[min(52vw,275px)] w-[min(52vw,275px)] rounded-full border border-green-300/20 sm:h-[275px] sm:w-[275px]"
+              className="absolute h-[min(44vw,220px)] w-[min(44vw,220px)] rounded-full border border-brand-300/20"
             />
 
-            <div className="relative z-10 flex w-full max-w-2xl items-center justify-center gap-3 px-4 sm:gap-8 sm:px-8">
+            <div className="relative z-10 flex w-full items-center justify-center gap-4 px-6 sm:gap-8">
               <div className="flex flex-col items-center gap-3 text-center">
-                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-[#0a1428]/75 text-green-300 shadow-[0_0_55px_rgba(34,197,94,0.14)] sm:h-28 sm:w-28">
-                  <Building2 className="h-9 w-9 sm:h-12 sm:w-12" strokeWidth={1.35} />
+                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-ink-900/75 text-brand-300 shadow-[0_0_55px_rgba(34,197,94,0.14)] sm:h-24 sm:w-24">
+                  <Building2 className="h-9 w-9 sm:h-11 sm:w-11" strokeWidth={1.35} />
                 </span>
-                <span className="text-[10px] font-bold tracking-[0.18em] text-slate-300 uppercase sm:text-xs">
+                <span className="text-[10px] font-bold tracking-[0.18em] text-mist-400 uppercase sm:text-xs">
                   Space
                 </span>
               </div>
 
               <div className="mb-6 flex min-w-16 flex-1 flex-col items-center gap-2 sm:min-w-24">
-                <span className="text-[9px] font-bold tracking-[0.18em] text-green-300 uppercase sm:text-[10px]">
+                <span className="text-[9px] font-bold tracking-[0.18em] text-brand-300 uppercase sm:text-[10px]">
                   Find a match
                 </span>
                 <span className="flex w-full items-center">
-                  <span className="h-px flex-1 bg-gradient-to-r from-transparent via-green-300/60 to-green-300/80" />
-                  <ArrowRight className="h-4 w-4 shrink-0 text-green-300 sm:h-5 sm:w-5" />
-                  <span className="h-px flex-1 bg-gradient-to-r from-green-300/80 via-green-300/60 to-transparent" />
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-300/60 to-brand-300/80" />
+                  <ArrowRight className="h-4 w-4 shrink-0 text-brand-300 sm:h-5 sm:w-5" />
+                  <span className="h-px flex-1 bg-gradient-to-r from-brand-300/80 via-brand-300/60 to-transparent" />
                 </span>
               </div>
 
               <div className="flex flex-col items-center gap-3 text-center">
-                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-[#0a1428]/75 text-green-300 shadow-[0_0_55px_rgba(34,197,94,0.14)] sm:h-28 sm:w-28">
-                  <Truck className="h-9 w-9 sm:h-12 sm:w-12" strokeWidth={1.35} />
+                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-ink-900/75 text-brand-300 shadow-[0_0_55px_rgba(34,197,94,0.14)] sm:h-24 sm:w-24">
+                  <Truck className="h-9 w-9 sm:h-11 sm:w-11" strokeWidth={1.35} />
                 </span>
-                <span className="text-[10px] font-bold tracking-[0.18em] text-slate-300 uppercase sm:text-xs">
+                <span className="text-[10px] font-bold tracking-[0.18em] text-mist-400 uppercase sm:text-xs">
                   Transport
                 </span>
               </div>
             </div>
 
-            <p className="absolute right-4 bottom-4 left-4 text-center text-xs tracking-wide text-slate-400 sm:bottom-7">
+            <p className="absolute right-4 bottom-5 left-4 text-center text-xs tracking-wide text-mist-500">
               Space · Storage · Transport · Equipment
             </p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="steps" className="scroll-mt-6 border-b border-white/10 py-12 sm:py-16">
-          <div className="grid gap-3 sm:grid-cols-2 sm:items-end sm:gap-8">
-            <div>
-              <p className="text-xs font-bold tracking-[0.16em] text-green-400 uppercase">
-                A simple process
-              </p>
-              <h2 className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
-                From first search to booking
-              </h2>
-            </div>
-            <p className="max-w-2xl text-sm leading-relaxed text-slate-400 sm:justify-self-end sm:text-base">
-              Whether you are looking for a resource or making one available,
-              the same straightforward steps bring both sides together.
+      {/* Steps */}
+      <section id="steps" className="scroll-mt-24 border-t border-white/10 py-14 sm:py-20">
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end sm:gap-10">
+          <div>
+            <p className="text-[11px] font-bold tracking-[0.16em] text-brand-400 uppercase">
+              A simple process
             </p>
+            <h2 className="mt-2.5 text-2xl font-extrabold text-mist-100 sm:text-3xl">
+              From first search to booking
+            </h2>
           </div>
+          <p className="max-w-2xl text-sm leading-relaxed text-mist-400 sm:justify-self-end sm:text-base">
+            Whether you are searching for somewhere to work, somewhere to store
+            things, or a way to move them — or you are the one with capacity
+            sitting idle — the same four steps bring both sides together.
+          </p>
+        </div>
 
-          <ol className="mt-8 grid gap-0 sm:grid-cols-2 xl:grid-cols-4">
-            {JOURNEY.map(({ Icon, title, desc }, index) => (
-              <li
-                key={title}
-                className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 border-t border-white/10 py-5 sm:px-5 sm:first:pl-0 sm:nth-[2]:border-t sm:nth-[3]:pl-0 xl:border-t-0 xl:border-l xl:px-5 xl:first:border-l-0 xl:first:pl-0"
-              >
-                <span className="row-span-2 flex h-9 w-9 items-center justify-center rounded-full bg-green-500/10 text-sm font-bold text-green-300">
-                  0{index + 1}
-                </span>
-                <span className="flex items-center gap-2 font-bold text-white">
-                  <Icon className="h-4 w-4 text-green-400" />
-                  {title}
-                </span>
-                <p className="col-start-2 mt-1 text-sm leading-relaxed text-slate-400">
+        <ol className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {JOURNEY.map(({ Icon, title, desc }, index) => (
+            <li
+              key={title}
+              className="relative rounded-2xl border border-white/10 bg-ink-800 p-5"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500/15 text-sm font-extrabold text-brand-400">
+                0{index + 1}
+              </span>
+              <span className="mt-4 flex items-center gap-2 font-bold text-mist-100">
+                <Icon className="h-4 w-4 text-brand-400" />
+                {title}
+              </span>
+              <p className="mt-2 text-sm leading-relaxed text-mist-400">
+                {desc}
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-6 text-xs leading-relaxed text-mist-500">
+          AI may be used to turn a plain-English sentence into structured
+          details. Matching itself is not guesswork — every match is scored from
+          the details in the request and the resource.
+        </p>
+      </section>
+
+      {/* Choose your path */}
+      <section className="border-t border-white/10 py-14 sm:py-20">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-bold tracking-[0.16em] text-brand-400 uppercase">
+            Choose your starting point
+          </p>
+          <h2 className="mt-2.5 text-2xl font-extrabold text-mist-100 sm:text-3xl">
+            What would you like to do?
+          </h2>
+        </div>
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          {GUIDES.map(({ to, Icon, label, title, desc }) => (
+            <Link
+              key={to}
+              to={to}
+              className="group flex min-w-0 flex-col rounded-2xl border border-white/10 bg-ink-800 p-6 transition-colors hover:border-brand-500/40 focus-visible:outline-none"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500/12 text-brand-400 transition-colors group-hover:bg-brand-600 group-hover:text-white">
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="mt-4 text-[11px] font-bold tracking-[0.16em] text-brand-400 uppercase">
+                {label}
+              </span>
+              <span className="mt-1.5 text-lg font-bold text-mist-100 sm:text-xl">
+                {title}
+              </span>
+              <span className="mt-2.5 flex-1 text-sm leading-relaxed text-mist-400">
+                {desc}
+              </span>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-brand-400">
+                Explore this path
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section
+        id="categories"
+        className="scroll-mt-24 border-t border-white/10 py-14 sm:py-20"
+      >
+        <div className="grid gap-4 sm:grid-cols-2 sm:items-end sm:gap-10">
+          <div>
+            <p className="text-[11px] font-bold tracking-[0.16em] text-brand-400 uppercase">
+              Browse capacity
+            </p>
+            <h2 className="mt-2.5 text-2xl font-extrabold text-mist-100 sm:text-3xl">
+              Four kinds of resources
+            </h2>
+          </div>
+          <p className="max-w-2xl text-sm leading-relaxed text-mist-400 sm:justify-self-end sm:text-base">
+            Every listing on Idle2Use belongs to exactly one of four categories.
+            Pick the one that fits and you will see what people are actually
+            offering near you, and how they describe it.
+          </p>
+        </div>
+
+        <ul className="mt-9 grid gap-x-10 sm:grid-cols-2">
+          {CATEGORIES.map(({ Icon, name, desc }) => (
+            <li
+              key={name}
+              className="flex items-start gap-4 border-t border-white/10 py-5"
+            >
+              <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500/12 text-brand-400">
+                <Icon className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-bold text-mist-100">{name}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-mist-400">
                   {desc}
                 </p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 text-xs leading-relaxed text-slate-500">
-            AI may help structure a plain-English request. Matches are scored
-            using details from the request and resource.
-          </p>
-        </section>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-        <section className="border-b border-white/10 py-12 sm:py-16">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold tracking-[0.16em] text-green-400 uppercase">
-              Choose your starting point
-            </p>
-            <h2 className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
-              What would you like to do?
-            </h2>
-          </div>
-          <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
-            {GUIDES.map(({ to, Icon, label, title, desc }) => (
+      {/* More guides */}
+      <section className="grid gap-6 border-t border-white/10 py-14 sm:grid-cols-2 sm:gap-10 sm:py-20">
+        <div>
+          <p className="text-[11px] font-bold tracking-[0.16em] text-brand-400 uppercase">
+            Want more detail?
+          </p>
+          <h2 className="mt-2.5 text-2xl font-extrabold text-mist-100 sm:text-3xl">
+            Explore the guides
+          </h2>
+        </div>
+        <ul className="divide-y divide-white/10 border-t border-white/10">
+          {MORE_GUIDES.map(({ to, Icon, title, desc }) => (
+            <li key={to}>
               <Link
-                key={to}
                 to={to}
-                className="group flex min-w-0 items-start gap-4 border-t border-white/10 py-5 transition-colors hover:border-green-500/50 focus-visible:outline-none"
+                className="group flex min-h-16 items-center gap-3.5 py-4 focus-visible:outline-none"
               >
-                <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-green-400 transition-colors group-hover:bg-green-500/10">
-                  <Icon className="h-5 w-5" />
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/12 text-brand-400">
+                  <Icon className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-bold tracking-widest text-green-400 uppercase">
-                    {label}
-                  </span>
-                  <span className="mt-1 block text-lg font-bold text-white sm:text-xl">
+                  <span className="block font-semibold text-mist-100 transition-colors group-hover:text-brand-300">
                     {title}
                   </span>
-                  <span className="mt-2 block max-w-xl text-sm leading-relaxed text-slate-400">
+                  <span className="mt-0.5 block text-sm text-mist-400">
                     {desc}
                   </span>
-                  <span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-200 group-hover:text-green-300">
-                    Explore this path
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
                 </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-mist-500 transition-all group-hover:translate-x-1 group-hover:text-brand-400" />
               </Link>
-            ))}
-          </div>
-        </section>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-        <section id="categories" className="scroll-mt-6 border-b border-white/10 py-12 sm:py-16">
-          <div className="grid gap-3 sm:grid-cols-2 sm:items-end sm:gap-8">
-            <div>
-              <p className="text-xs font-bold tracking-[0.16em] text-green-400 uppercase">
-                Browse capacity
-              </p>
-              <h2 className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
-                Four kinds of resources
-              </h2>
-            </div>
-            <p className="max-w-2xl text-sm leading-relaxed text-slate-400 sm:justify-self-end sm:text-base">
-              Explore the spaces and resources people can request or make
-              available on Idle2Use.
-            </p>
-          </div>
-
-          <ul className="mt-7 grid gap-x-10 sm:grid-cols-2">
-            {CATEGORIES.map(({ Icon, name, desc }) => (
-              <li
-                key={name}
-                className="flex items-start gap-4 border-t border-white/10 py-5"
-              >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center text-green-400">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-white">{name}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-400">
-                    {desc}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="grid gap-5 py-12 sm:grid-cols-2 sm:gap-8 sm:py-16">
-          <div>
-            <p className="text-xs font-bold tracking-[0.16em] text-green-400 uppercase">
-              Want more detail?
-            </p>
-            <h2 className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
-              Explore the guides
-            </h2>
-          </div>
-          <ul className="divide-y divide-white/10 border-t border-white/10">
-            {MORE_GUIDES.map(({ to, Icon, title, desc }) => (
-              <li key={to}>
-                <Link
-                  to={to}
-                  className="group flex min-h-16 items-center gap-3 py-4 focus-visible:outline-none"
-                >
-                  <Icon className="h-4 w-4 shrink-0 text-green-400" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-white group-hover:text-green-300">
-                      {title}
-                    </span>
-                    <span className="mt-0.5 block text-sm text-slate-400">
-                      {desc}
-                    </span>
-                  </span>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-slate-500 transition-transform group-hover:translate-x-1 group-hover:text-green-400" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <CtaBand
-          text="Ready to put capacity to use?"
-          to={user ? "/app" : "/register"}
-          label={user ? "Go to Dashboard" : "Get Started"}
-        />
-      </div>
+      <CtaBand
+        text="Ready to put capacity to use?"
+        subtext="Create an account to describe what you need, or to list what you have spare. It takes a couple of minutes, and matching does the rest."
+        to={user ? "/app" : "/register"}
+        label={user ? "Go to Dashboard" : "Get Started"}
+      />
     </div>
   );
 }

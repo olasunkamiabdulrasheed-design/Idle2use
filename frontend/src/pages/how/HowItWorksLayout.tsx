@@ -24,28 +24,33 @@ export default function HowItWorksLayout() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0a1428] text-white">
+    <div className="min-h-screen overflow-x-hidden bg-ink-900 text-mist-200">
       <Navbar />
-      <main className="w-full px-4 pb-6 sm:px-8 lg:px-12 2xl:px-16">
-        {crumb && (
-          <nav
-            aria-label="Breadcrumb"
-            className="flex items-center gap-2 border-b border-white/10 py-3 text-sm text-slate-400"
-          >
+
+      {crumb && (
+        <nav
+          aria-label="Breadcrumb"
+          className="border-b border-white/10 bg-ink-950/50"
+        >
+          <div className="container-wide flex items-center gap-2 py-3.5 text-sm">
             <Link
               to="/how-it-works"
-              className="inline-flex items-center gap-1.5 rounded hover:text-white focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+              className="inline-flex items-center gap-1.5 rounded-lg font-semibold text-mist-400 transition-colors hover:text-mist-100"
             >
-              <ArrowLeft className="h-4 w-4" /> How It Works
+              <ArrowLeft className="h-4 w-4" /> How it works
             </Link>
-            <span aria-hidden="true" className="text-slate-600">
+            <span aria-hidden="true" className="text-mist-500">
               /
             </span>
-            <span className="font-semibold text-white">{crumb}</span>
-          </nav>
-        )}
+            <span className="font-bold text-mist-100">{crumb}</span>
+          </div>
+        </nav>
+      )}
+
+      <main className="container-wide pb-16">
         <Outlet />
       </main>
+
       <Footer />
     </div>
   );

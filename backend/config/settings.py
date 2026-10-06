@@ -195,7 +195,10 @@ SIMPLE_JWT = {
 
 # CORS: allow the Vite dev server to call the API from the browser.
 
-CORS_ALLOWED_ORIGINS = _env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5174")
+CORS_ALLOWED_ORIGINS = _env_list(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5174",
+)
 
 
 # Internationalization
