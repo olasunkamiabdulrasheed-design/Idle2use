@@ -136,20 +136,23 @@ export default function Landing() {
       </section>
 
       {/* Categories: 1 col mobile / 2 col sm / 4 col lg, clickable */}
-      <section id="categories" className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+      <section
+        id="categories"
+        className="w-full px-4 pb-14 sm:px-8 lg:px-12 2xl:px-16"
+      >
         <h2 className="text-xl font-extrabold text-white sm:text-2xl">
           Browse by category
         </h2>
         <p className="mt-1 text-sm text-slate-400">
           Four kinds of capacity, one marketplace.
         </p>
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 xl:grid-cols-4">
           {CATEGORIES.map(({ Icon, name, desc }) => (
             <Link
               key={name}
               to="/register"
               aria-label={`Get started with ${name}`}
-              className="group rounded-2xl bg-white p-5 text-slate-900 shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+              className="group flex h-full flex-col rounded-2xl bg-white p-5 text-slate-900 shadow-lg transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white transition-colors group-hover:bg-green-600">
                 <Icon className="h-5 w-5" />
