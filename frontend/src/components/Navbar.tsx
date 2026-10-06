@@ -34,7 +34,7 @@ export default function Navbar() {
 
   return (
     <header className="relative border-b border-white/10">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <div className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-8 lg:px-12 2xl:px-16">
         <Link
           to="/"
           className="flex shrink-0 items-center gap-2 text-lg font-extrabold text-white focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none rounded"
@@ -46,7 +46,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-6 text-sm text-slate-300 md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-4 text-sm text-slate-300 lg:flex xl:gap-6">
           {NAV_LINKS.map((l) => (
             <Link
               key={l.label}
@@ -59,7 +59,7 @@ export default function Navbar() {
         </nav>
 
         {/* Desktop CTAs */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <Link
             to="/login"
             className="rounded-lg border border-white/20 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
@@ -77,7 +77,7 @@ export default function Navbar() {
         {/* Mobile hamburger */}
         <button
           type="button"
-          className="rounded-lg border border-white/20 p-2 text-white md:hidden"
+          className="rounded-lg border border-white/20 p-2 text-white lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="site-mobile-menu"
@@ -91,14 +91,14 @@ export default function Navbar() {
       {open && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/60 md:hidden"
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
           <nav
             id="site-mobile-menu"
             aria-label="Mobile navigation"
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-white/10 bg-[#0a1428] px-4 py-4 shadow-2xl md:hidden"
+            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-white/10 bg-[#0a1428] px-4 py-4 shadow-2xl lg:hidden"
           >
             <ul className="space-y-1">
               {NAV_LINKS.map((l) => (
