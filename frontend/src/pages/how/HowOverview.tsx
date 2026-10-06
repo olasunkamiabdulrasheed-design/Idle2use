@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  Building2,
   Boxes,
   CalendarCheck,
   MessageSquare,
@@ -9,6 +10,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  Truck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../authContext";
@@ -78,25 +80,22 @@ export default function HowOverview() {
   return (
     <div className="pb-12">
       <div className="mx-auto w-full max-w-screen-2xl">
-        <section className="grid gap-8 border-b border-white/10 py-12 sm:py-16 lg:grid-cols-2 lg:items-end lg:gap-16 lg:py-24">
-          <div>
+        <section className="relative isolate grid overflow-hidden border-b border-white/10 bg-[#0b192e] -mx-4 sm:-mx-8 lg:-mx-12 2xl:-mx-16 lg:min-h-[560px] lg:grid-cols-2">
+          <div className="flex flex-col justify-center px-5 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20 xl:px-20 2xl:px-24">
             <p className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.16em] text-green-400 uppercase">
               <Sparkles className="h-4 w-4" />
               How Idle2Use works
             </p>
-            <h1 className="mt-5 max-w-3xl text-4xl leading-[1.08] font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Put what you have to work.{" "}
+            <h1 className="mt-5 max-w-2xl text-4xl leading-[1.05] font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
+              Put idle capacity to work.{" "}
               <span className="text-green-400">Find what you need.</span>
             </h1>
-          </div>
-          <div className="max-w-xl lg:justify-self-end">
-            <p className="text-base leading-relaxed text-slate-300 sm:text-lg">
-              Idle2Use connects people looking for space, storage,
-              transportation, or equipment with people who have it available.
-              Describe a need or list a resource, then connect and arrange a
-              booking.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-300 sm:text-lg">
+              Find space, storage, transportation, or equipment — or help
+              someone else put theirs to use. Idle2Use brings both sides
+              together to connect and arrange a booking.
             </p>
-            <div className="mt-6 flex flex-col gap-3 min-[420px]:flex-row">
+            <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row">
               <Link
                 to={user ? "/app/find" : "/register"}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-green-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-green-700 focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
@@ -107,9 +106,62 @@ export default function HowOverview() {
                 href="#steps"
                 className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/20 px-5 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-white/40 hover:text-white focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
               >
-                See the steps
+                See how it works
               </a>
             </div>
+          </div>
+
+          <div
+            aria-label="Illustration of a space and transport resource connected through Idle2Use"
+            className="relative isolate flex min-h-[280px] items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_45%,rgba(34,197,94,0.24),transparent_52%),linear-gradient(135deg,#102d39,#0c2230_55%,#111b30)] sm:min-h-[360px] lg:min-h-full"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 opacity-[0.13] [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_78%)]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute h-[min(74vw,390px)] w-[min(74vw,390px)] rounded-full border border-green-300/15 sm:h-[390px] sm:w-[390px]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute h-[min(52vw,275px)] w-[min(52vw,275px)] rounded-full border border-green-300/20 sm:h-[275px] sm:w-[275px]"
+            />
+
+            <div className="relative z-10 flex w-full max-w-2xl items-center justify-center gap-3 px-4 sm:gap-8 sm:px-8">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-[#0a1428]/75 text-green-300 shadow-[0_0_55px_rgba(34,197,94,0.14)] sm:h-28 sm:w-28">
+                  <Building2 className="h-9 w-9 sm:h-12 sm:w-12" strokeWidth={1.35} />
+                </span>
+                <span className="text-[10px] font-bold tracking-[0.18em] text-slate-300 uppercase sm:text-xs">
+                  Space
+                </span>
+              </div>
+
+              <div className="mb-6 flex min-w-16 flex-1 flex-col items-center gap-2 sm:min-w-24">
+                <span className="text-[9px] font-bold tracking-[0.18em] text-green-300 uppercase sm:text-[10px]">
+                  Find a match
+                </span>
+                <span className="flex w-full items-center">
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent via-green-300/60 to-green-300/80" />
+                  <ArrowRight className="h-4 w-4 shrink-0 text-green-300 sm:h-5 sm:w-5" />
+                  <span className="h-px flex-1 bg-gradient-to-r from-green-300/80 via-green-300/60 to-transparent" />
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center gap-3 text-center">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-[#0a1428]/75 text-green-300 shadow-[0_0_55px_rgba(34,197,94,0.14)] sm:h-28 sm:w-28">
+                  <Truck className="h-9 w-9 sm:h-12 sm:w-12" strokeWidth={1.35} />
+                </span>
+                <span className="text-[10px] font-bold tracking-[0.18em] text-slate-300 uppercase sm:text-xs">
+                  Transport
+                </span>
+              </div>
+            </div>
+
+            <p className="absolute right-4 bottom-4 left-4 text-center text-xs tracking-wide text-slate-400 sm:bottom-7">
+              Space · Storage · Transport · Equipment
+            </p>
           </div>
         </section>
 
