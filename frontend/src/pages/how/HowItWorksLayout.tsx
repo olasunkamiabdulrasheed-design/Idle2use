@@ -26,7 +26,7 @@ export default function HowItWorksLayout() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0a1428] text-white">
       <Navbar />
-      <main className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
+      <main className="w-full px-4 pb-6 sm:px-8 lg:px-12 2xl:px-16">
         {crumb && (
           <nav
             aria-label="Breadcrumb"
